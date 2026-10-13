@@ -1247,7 +1247,7 @@ GameObject:
   - component: {fileID: 1587944327}
   - component: {fileID: 1587944326}
   m_Layer: 0
-  m_Name: Key_A
+  m_Name: Key_S
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1413,6 +1413,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
   dashSpeedMultiplier: 2
+  jumpForce: 8
+  hipDropForce: 15
 --- !u!136 &1755738490
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1548,7 +1550,7 @@ GameObject:
   - component: {fileID: 1888484319}
   - component: {fileID: 1888484318}
   m_Layer: 0
-  m_Name: Key_S
+  m_Name: Key_A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
