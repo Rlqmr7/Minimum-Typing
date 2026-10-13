@@ -10,7 +10,7 @@ public class PhysicalKey : MonoBehaviour
     private Vector3 startLocalPosition;
     private bool isPressed = false;
 
-    // タイピング管理クラスへの参照（後述）
+    // タイピング管理クラスへの参照
     private TypingManager typingManager;
 
     void Start()
@@ -18,13 +18,8 @@ public class PhysicalKey : MonoBehaviour
         joint = GetComponent<ConfigurableJoint>();
         startLocalPosition = transform.localPosition;
 
-        // シーン内のTypingManagerを探す
+        // シーン内のTypingManagerを探す（見つからなくてもエラーを出さないように修正）
         typingManager = Object.FindAnyObjectByType<TypingManager>();
-
-        if (typingManager == null)
-        {
-            Debug.LogError("TypingManagerがシーンに見つかりません。");
-        }
     }
 
     void Update()
@@ -50,13 +45,10 @@ public class PhysicalKey : MonoBehaviour
     {
         Debug.Log($"キー '{keyValue}' が踏まれました！");
 
-        // タイピング管理クラスに文字を送る
+        // タイピング管理クラスが存在する場合のみ文字を送る
         if (typingManager != null)
         {
             typingManager.OnKeyTargeted(keyValue);
         }
-
-        // ここで音を鳴らす、エフェクトを出すなどのフィードバックを行う
-        // GetComponent<AudioSource>()?.Play();
     }
 }
