@@ -1,13 +1,13 @@
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine.UI; // UIを使う場合
+using TMPro; // TextMeshProを使うため
 
 public class TypingManager : MonoBehaviour
 {
     [Header("問題設定")]
-    public string targetWord = "UNITY"; // お題の単語
-    public Text displayParentText;     // お題を表示するUIテキスト（任意）
-    public Text displayInputText;      // 入力状況を表示するUIテキスト（任意）
+    public string targetWord = "warewareha";     // お題の英単語
+
+    [Header("UI表示用 (TextMeshPro)")]
+    public TextMeshProUGUI displayInputText;      // 入力状況を表示するテキスト
 
     private int currentIndex = 0;       // 現在狙っている文字のインデックス
     private bool isFinished = false;    // クリアしたか
@@ -22,7 +22,7 @@ public class TypingManager : MonoBehaviour
     {
         if (isFinished) return;
 
-        // 大文字小文字を区別しないようにする（任意）
+        // 大文字小文字を区別しないようにする
         keyPressed = char.ToUpper(keyPressed);
         char requiredKey = char.ToUpper(targetWord[currentIndex]);
 
@@ -42,7 +42,6 @@ public class TypingManager : MonoBehaviour
         {
             // 不正解（ミス）
             Debug.Log($"<color=red>ミス: {keyPressed} (正解は {requiredKey})</color>");
-            // ミス時のペナルティ処理（ライフ減少、音など）をここに書く
         }
 
         UpdateDisplay();
@@ -51,20 +50,19 @@ public class TypingManager : MonoBehaviour
     // UIの表示を更新する
     void UpdateDisplay()
     {
-        if (displayParentText != null)
-        {
-            displayParentText.text = targetWord;
-        }
-
         if (displayInputText != null)
         {
-            // 入力済みの部分を色を変えるなどして表示
-            string inputText = "<color=green>" + targetWord.Substring(0, currentIndex) + "</color>";
+            // 入力済みの部分（例：黄色やネオン風）
+            string typedPart = targetWord.Substring(0, currentIndex);
+            // まだ入力していない残りの部分
+            string remainingPart = "";
             if (currentIndex < targetWord.Length)
             {
-                inputText += targetWord.Substring(currentIndex);
+                remainingPart = targetWord.Substring(currentIndex);
             }
-            displayInputText.text = inputText;
+
+            // TextMeshProのタグを使って、入力済みを黄色、未入力を白（またはシアン）にする
+            displayInputText.text = $"<color=#FFFF00>{typedPart}</color>{remainingPart}";
         }
     }
 
@@ -73,6 +71,5 @@ public class TypingManager : MonoBehaviour
     {
         isFinished = true;
         Debug.Log("<color=blue>★★★ クリア！ ★★★</color>");
-        // クリア演出、次のステージへ、などの処理
     }
 }
