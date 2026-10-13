@@ -19,7 +19,7 @@ public class PhysicalKey : MonoBehaviour
         startLocalPosition = transform.localPosition;
 
         // シーン内のTypingManagerを探す
-        typingManager = Object.FindFirstObjectByType<TypingManager>();
+        typingManager = Object.FindAnyObjectByType<TypingManager>();
 
         if (typingManager == null)
         {
