@@ -10,23 +10,24 @@ public class PlayerController : MonoBehaviour
     private CapsuleCollider col;
 
     [Header("移動設定")]
-    public float moveSpeed = 7f; // Rigidbody用に少し速めの値を設定
+    public float moveForce = 35f; // 移動に加える力
+    public float maxSpeed = 7f;   // 最大移動速度
     public float dashSpeedMultiplier = 1.8f;
 
     [Header("ジャンプ・ヒップドロップ設定")]
-    public float jumpForce = 8f; // ジャンプの力
-    public float hipDropForce = 15f; // ヒップドロップの急降下スピード
-    private bool isGrounded; // 地面にいるか
-    private bool isHipDropping = false; // ヒップドロップ中か
+    public float jumpForce = 8f;
+    public float hipDropForce = 20f; // 少し強めに調整
+    private bool isGrounded;
+    private bool isHipDropping = false;
 
     void Awake()
     {
-        // 必要なコンポーネントを取得
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
+        // 回転が勝手に起きないように固定
+        rb.freezeRotation = true;
     }
 
-    // Player Input の "OnMove" イベントから呼び出されます
     public void OnMove(InputValue value)
     {
         moveInput = value.Get<Vector2>();
@@ -34,20 +35,17 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // --- 接地判定（簡易版） ---
-        // カプセルの少し下に向かってレイ（光線）を飛ばし、地面に触れているか確認
+        // --- 接地判定 ---
         float rayDistance = col.height / 2f + 0.1f;
         isGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance);
 
-        // デバッグ用に地面を検知したら赤、空中なら青でレイを表示
         Debug.DrawRay(transform.position, Vector3.down * rayDistance, isGrounded ? Color.red : Color.blue);
 
         // --- ヒップドロップの着地判定 ---
         if (isHipDropping && isGrounded)
         {
             isHipDropping = false;
-            // 着地した瞬間、少し移動を止めるなどの処理を入れても良い（今回はそのまま）
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z); // Y方向の速度をリセット
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
             Debug.Log("着地！ヒップドロップ終了。");
         }
 
@@ -56,13 +54,11 @@ public class PlayerController : MonoBehaviour
         {
             if (isGrounded)
             {
-                // 地面：ジャンプ
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                isHipDropping = false; // ジャンプ中はヒップドロップ状態をリセット
+                isHipDropping = false;
             }
             else if (!isHipDropping)
             {
-                // 空中：ヒップドロップ
                 StartHipDrop();
             }
         }
@@ -70,25 +66,23 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // --- 物理演算を用いた移動処理 ---
-        // ヒップドロップ中は移動操作を受け付けないようにする場合
         if (isHipDropping) return;
 
-        // ダッシュ判定（XboxコントローラーのRB長押し）
         bool isDashing = Gamepad.current != null && Gamepad.current.rightShoulder.isPressed;
-        float currentSpeed = isDashing ? moveSpeed * dashSpeedMultiplier : moveSpeed;
+        float currentMaxSpeed = isDashing ? maxSpeed * dashSpeedMultiplier : maxSpeed;
 
-        // 入力方向から移動速度（velocity）を作成
-        Vector3 movement = new Vector3(moveInput.x * currentSpeed, rb.linearVelocity.y, moveInput.y * currentSpeed);
-        rb.linearVelocity = movement;
+        // 速度を直接上書きせず、力を加えて動かすことで、下のキー（PhysicalKey）を押し潰せるようにする
+        Vector3 targetVelocity = new Vector3(moveInput.x * currentMaxSpeed, rb.linearVelocity.y, moveInput.y * currentMaxSpeed);
+        Vector3 velocityChange = targetVelocity - rb.linearVelocity;
+        velocityChange.y = 0; // Y軸方向の速度変化は除外（重力やジャンプを邪魔しないため）
+
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
 
     void StartHipDrop()
     {
         isHipDropping = true;
-        // 上方向への速度を完全にリセットしてから
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-        // 真下に向かって一気に力を加える
         rb.AddForce(Vector3.down * hipDropForce, ForceMode.Impulse);
         Debug.Log("ヒップドロップ！");
     }

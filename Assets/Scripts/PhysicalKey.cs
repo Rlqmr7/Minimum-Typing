@@ -4,7 +4,7 @@ public class PhysicalKey : MonoBehaviour
 {
     [Header("キーの設定")]
     public char keyValue; // このキーの文字（'A', 'B'など）
-    public float pressThreshold = 0.15f; // 押し込まれたと判定するY座標の閾値（初期位置からの差）
+    public float pressThreshold = 0.05f; // 押し込まれたと判定するY座標の閾値（初期位置からの差）
 
     private ConfigurableJoint joint;
     private Vector3 startLocalPosition;
@@ -38,6 +38,7 @@ public class PhysicalKey : MonoBehaviour
         {
             isPressed = false;
         }
+        Debug.Log($"現在の沈み込み: {currentDepression} (閾値: {pressThreshold})");
     }
 
     // キーが押された時の処理
