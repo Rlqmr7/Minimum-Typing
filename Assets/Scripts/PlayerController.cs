@@ -20,12 +20,21 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isHipDropping = false;
 
+    [Header("エフェクト設定")]
+    public ParticleSystem dustEffect; // 砂煙のパーティクル
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
         // 回転が勝手に起きないように固定
         rb.freezeRotation = true;
+
+        // もしインスペクターで割り当てていなければ自動取得
+        if (dustEffect == null)
+        {
+            dustEffect = GetComponentInChildren<ParticleSystem>();
+        }
     }
 
     public void OnMove(InputValue value)
@@ -46,7 +55,13 @@ public class PlayerController : MonoBehaviour
         {
             isHipDropping = false;
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-            Debug.Log("着地！ヒップドロップ終了。");
+
+            // ★着地した瞬間に砂煙を再生！
+            if (dustEffect != null)
+            {
+                dustEffect.Play();
+                Debug.Log("着地！ヒップドロップ終了＆砂煙再生！");
+            }
         }
 
         // --- Aボタン（Jump / HipDrop）の入力判定 ---
