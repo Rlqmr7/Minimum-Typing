@@ -3,75 +3,79 @@ using TMPro;
 
 public class TypingManager : MonoBehaviour
 {
-    [Header("問題設定")]
-    public string targetWord = "warewareha";     // お題の英単語
+    public static TypingManager Instance;
 
-    [Header("UI表示用 (TextMeshPro)")]
-    public TextMeshProUGUI displayInputText;      // 入力状況を表示するテキスト
+    [Header("UI設定")]
+    public TextMeshProUGUI typedTextUI; // モニターの文字を表示しているTextMeshPro
 
-    private int currentIndex = 0;       // 現在狙っている文字のインデックス
-    private bool isFinished = false;    // クリアしたか
+    [Header("ゲーム設定")]
+    public string targetWord = "ASD";       // 画像に合わせた正解ワード[cite: 1]
+
+    private int nextCharIndex = 0;        // 次に入力すべき文字の番号（0番目、1番目…）
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
-        UpdateDisplay();
-        Debug.Log($"<color=cyan>【タイピング開始】お題: {targetWord}</color>");
+        UpdateUI();
     }
 
-    // キーが押された時に呼ばれる（PhysicalKeyから）
-    public void OnKeyTargeted(char keyPressed)
+    // キーが踏まれて文字が渡されたとき
+    public void AppendChar(char c)
     {
-        if (isFinished) return;
+        // すでに全部クリアしていたら何もしない
+        if (nextCharIndex >= targetWord.Length) return;
 
-        // 大文字小文字を合わせる（必要に応じて）
-        keyPressed = char.ToLower(keyPressed);
-        char requiredKey = char.ToLower(targetWord[currentIndex]);
-
-        if (keyPressed == requiredKey)
+        // 次に入力すべき文字と一致しているかチェック（大文字小文字を無視）
+        if (char.ToUpper(c) == char.ToUpper(targetWord[nextCharIndex]))
         {
-            // 正解！
-            currentIndex++;
+            // 正解！次の文字へ進む
+            nextCharIndex++;
+            Debug.Log($"正解！進捗: {nextCharIndex}/{targetWord.Length}");
 
-            // ★ コンソールに残りの状況や進捗を表示
-            string typed = targetWord.Substring(0, currentIndex);
-            string remaining = targetWord.Substring(currentIndex);
-            Debug.Log($"<color=green>【正解！】入力: {keyPressed} | 進捗: [{typed}]<color=gray>{remaining}</color> ({currentIndex}/{targetWord.Length})</color>");
+            UpdateUI();
 
-            // 全文字入力したらクリア
-            if (currentIndex >= targetWord.Length)
+            // 全部クリアしたかチェック
+            if (nextCharIndex >= targetWord.Length)
             {
-                OnClear();
+                Debug.Log("すべての文字の入力に成功しました！");
             }
         }
         else
         {
-            // 不正解（ミス）
-            Debug.Log($"<color=red>【ミス！】入力: {keyPressed} (正解は '{targetWord[currentIndex]}')</color>");
+            Debug.Log($"不正解のキーです ('{c}')");
         }
-
-        UpdateDisplay();
     }
 
-    // UIの表示を更新する
-    void UpdateDisplay()
+    // 画面の表示を更新（一文字ずつ色を変える）
+    void UpdateUI()
     {
-        if (displayInputText != null)
+        if (typedTextUI != null)
         {
-            string typedPart = targetWord.Substring(0, currentIndex);
-            string remainingPart = "";
-            if (currentIndex < targetWord.Length)
+            if (nextCharIndex > 0)
             {
-                remainingPart = targetWord.Substring(currentIndex);
-            }
+                // 入力済みの部分を黄色（<color=yellow>）、残りを白（<color=white>）にする
+                string typedPart = "<color=yellow>" + targetWord.Substring(0, nextCharIndex) + "</color>";
+                string untypedPart = "<color=white>" + targetWord.Substring(nextCharIndex) + "</color>";
 
-            displayInputText.text = $"<color=#FFFF00>{typedPart}</color>{remainingPart}";
+                typedTextUI.text = typedPart + untypedPart;
+            }
+            else
+            {
+                // 最初は全部白文字
+                typedTextUI.text = "<color=white>" + targetWord + "</color>";
+            }
         }
     }
 
-    // クリア時の処理
-    void OnClear()
+    // リセット用
+    public void ResetTyping()
     {
-        isFinished = true;
-        Debug.Log("<color=blue>★★★ クリア！すべて入力完了しました！ ★★★</color>");
+        nextCharIndex = 0;
+        UpdateUI();
     }
 }

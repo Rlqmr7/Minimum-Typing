@@ -1,55 +1,91 @@
 using UnityEngine;
+using System.Collections;
 
 public class PhysicalKey : MonoBehaviour
 {
     [Header("キーの設定")]
-    public char keyValue; // このキーの文字（'A', 'B'など）
-    public float pressThreshold = 0.05f; // 押し込まれたと判定するY座標の閾値（初期位置からの差）
+    public char keyValue = 'A';
+    public Transform visualMesh;       // 沈ませる見た目のオブジェクト（子オブジェクト）
+    public float pressDepth = 0.1f;    // 沈む深さ
+    public float moveSpeed = 20f;      // 沈む・戻るスピード
+    public float bounceVelocity = 8f;  // 踏んだ後にプレイヤーを跳ね返す上方向の速度
 
-    private ConfigurableJoint joint;
-    private Vector3 startLocalPosition;
+    private Vector3 defaultLocalPos;
+    private Vector3 pressedLocalPos;
     private bool isPressed = false;
-
-    // タイピング管理クラスへの参照
-    private TypingManager typingManager;
 
     void Start()
     {
-        joint = GetComponent<ConfigurableJoint>();
-        startLocalPosition = transform.localPosition;
+        if (visualMesh == null)
+        {
+            visualMesh = transform;
+        }
 
-        // シーン内のTypingManagerを探す（見つからなくてもエラーを出さないように修正）
-        typingManager = Object.FindAnyObjectByType<TypingManager>();
+        defaultLocalPos = visualMesh.localPosition;
+        pressedLocalPos = defaultLocalPos - new Vector3(0, pressDepth, 0);
     }
 
-    void Update()
+    // 「通常の物理衝突（OnCollisionEnter）」を使うことで、キーの上に乗ることができます
+    private void OnCollisionEnter(Collision collision)
     {
-        // 初期位置からの沈み込み量を計算
-        float currentDepression = startLocalPosition.y - transform.localPosition.y;
+        PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            // 完全に「ヒップドロップ中」かつ「上から踏んだ場合」のみ反応
+            if (player.IsHipDropping && collision.transform.position.y > transform.position.y + 0.05f)
+            {
+                PressKey();
+                player.EndHipDrop();
 
-        // 閾値を超えて押し込まれたか、かつまだ「押された」状態でない場合
-        if (currentDepression >= pressThreshold && !isPressed)
-        {
-            isPressed = true;
-            OnKeyPress();
+                Rigidbody playerRb = collision.gameObject.GetComponent<Rigidbody>();
+                if (playerRb != null)
+                {
+                    playerRb.linearVelocity = new Vector3(playerRb.linearVelocity.x, bounceVelocity, playerRb.linearVelocity.z);
+                }
+            }
         }
-        // 閾値を下回って戻った場合
-        else if (currentDepression < pressThreshold * 0.8f && isPressed) // 80%まで戻ったらリセット
-        {
-            isPressed = false;
-        }
-        Debug.Log($"現在の沈み込み: {currentDepression} (閾値: {pressThreshold})");
     }
 
-    // キーが押された時の処理
-    void OnKeyPress()
+    public void PressKey()
     {
-        Debug.Log($"キー '{keyValue}' が踏まれました！");
-
-        // タイピング管理クラスが存在する場合のみ文字を送る
-        if (typingManager != null)
+        if (!isPressed)
         {
-            typingManager.OnKeyTargeted(keyValue);
+            StartCoroutine(PressRoutine());
+            Debug.Log($"キー [{keyValue}] がヒップドロップで押されました！");
+
+            if (TypingManager.Instance != null)
+            {
+                TypingManager.Instance.AppendChar(keyValue);
+            }
         }
+    }
+
+    IEnumerator PressRoutine()
+    {
+        isPressed = true;
+
+        // 1. 沈み込み（見た目のメッシュだけが動くので、親のコライダーはビクともせずスタックしない）
+        float time = 0f;
+        while (time < 1f)
+        {
+            time += Time.deltaTime * moveSpeed;
+            visualMesh.localPosition = Vector3.Lerp(defaultLocalPos, pressedLocalPos, time);
+            yield return null;
+        }
+        visualMesh.localPosition = pressedLocalPos;
+
+        yield return new WaitForSeconds(0.02f);
+
+        // 2. 元の位置に戻る
+        time = 0f;
+        while (time < 1f)
+        {
+            time += Time.deltaTime * moveSpeed;
+            visualMesh.localPosition = Vector3.Lerp(pressedLocalPos, defaultLocalPos, time);
+            yield return null;
+        }
+        visualMesh.localPosition = defaultLocalPos;
+
+        isPressed = false;
     }
 }
