@@ -20,13 +20,11 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isHipDropping = false;
 
-<<<<<<< HEAD
     // 外部（PhysicalKey）からヒップドロップ中か確認できるようにするプロパティ
     public bool IsHipDropping => isHipDropping;
-=======
+
     [Header("エフェクト設定")]
     public ParticleSystem dustEffect; // 砂煙のパーティクル
->>>>>>> 9336a3ad5ba1c5e0a0a89515afe8eb9280b3a6f5
 
     void Awake()
     {
@@ -57,7 +55,6 @@ public class PlayerController : MonoBehaviour
         // --- 通常の地面に着地した場合のヒップドロップ終了 ---
         if (isHipDropping && isGrounded)
         {
-<<<<<<< HEAD
             // 真下にあるのが「PhysicalKey」でなければ、通常通りヒップドロップ終了
             // （キーの上に着地したときは、PhysicalKey側の判定に任せるためここでは消さない）
             RaycastHit hit;
@@ -67,18 +64,14 @@ public class PlayerController : MonoBehaviour
                 {
                     isHipDropping = false;
                     rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-                    Debug.Log("着地！ヒップドロップ終了。");
-                }
-=======
-            isHipDropping = false;
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
-            // ★着地した瞬間に砂煙を再生！
-            if (dustEffect != null)
-            {
-                dustEffect.Play();
-                Debug.Log("着地！ヒップドロップ終了＆砂煙再生！");
->>>>>>> 9336a3ad5ba1c5e0a0a89515afe8eb9280b3a6f5
+                    // 着地した瞬間に砂煙を再生！
+                    if (dustEffect != null)
+                    {
+                        dustEffect.Play();
+                    }
+                    Debug.Log("着地！ヒップドロップ終了＆砂煙再生！");
+                }
             }
         }
 
@@ -126,7 +119,13 @@ public class PlayerController : MonoBehaviour
         {
             isHipDropping = false;
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-            Debug.Log("キーを踏んでヒップドロップ終了！");
+
+            // キー上で着地したときも砂煙を出す
+            if (dustEffect != null)
+            {
+                dustEffect.Play();
+            }
+            Debug.Log("キーを踏んでヒップドロップ終了＆砂煙再生！");
         }
     }
 }
