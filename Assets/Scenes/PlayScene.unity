@@ -248,11 +248,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b5e04fe75bb5248a7358745d047399, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TypingManager
-  typedTextUI: {fileID: 0}
-  targetWords:
+  typedTextUI: {fileID: 1552669353}
+  targetWordsPool:
   - ASD
-  - UNITY
-  - C#, SCRIPT
+  - QWE
+  - ZXC
+  - TGB
+  - RFV
 --- !u!4 &56315913
 Transform:
   m_ObjectHideFlags: 0
@@ -5702,7 +5704,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: faa79047b1405f04ab0683bba13e6780, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5762,7 +5764,7 @@ GameObject:
   - component: {fileID: 1552669355}
   - component: {fileID: 1552669353}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: QuestionTXT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5775,7 +5777,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5894,7 +5896,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f39ebd1a9d64d944eaf90c21b134e838, type: 3}
   m_Name: 

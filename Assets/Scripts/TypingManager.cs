@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using System.Collections.Generic; // Listを使うために必要
+using System.Collections.Generic;
 
 public class TypingManager : MonoBehaviour
 {
@@ -9,11 +9,11 @@ public class TypingManager : MonoBehaviour
     [Header("UI設定")]
     public TextMeshProUGUI typedTextUI; // モニターの文字を表示しているTextMeshPro
 
-    [Header("ゲーム設定（複数の単語リスト）")]
-    public List<string> targetWords = new List<string> { "ASD", "UNITY", "C#, SCRIPT" }; // インスペクターから自由に追加・変更可能
-    private int currentWordIndex = 0;   // 現在どの単語をタイピングしているか
-    private string currentTargetWord;   // 現在の正解ワード
+    [Header("ゲーム設定（出題する単語プール）")]
+    public List<string> targetWordsPool = new List<string> { "ASD", "UNITY", "C#", "GAME", "PLAYER" }; // 好きなだけ追加可能
 
+    private List<string> remainingWords = new List<string>(); // まだ出題されていない単語のリスト
+    private string currentTargetWord;   // 現在の正解ワード
     private int nextCharIndex = 0;        // 次に入力すべき文字の番号
 
     void Awake()
@@ -24,40 +24,48 @@ public class TypingManager : MonoBehaviour
 
     void Start()
     {
+        ResetAndShufflePool();
         LoadNextWord();
     }
 
-    // 次の単語をセットして初期化する
+    // 問題プールをリセットしてシャッフルする
+    void ResetAndShufflePool()
+    {
+        remainingWords = new List<string>(targetWordsPool);
+
+        // リストをランダムに並び替える（Fisher-Yatesアルゴリズム）
+        for (int i = 0; i < remainingWords.Count; i++)
+        {
+            string temp = remainingWords[i];
+            int randomIndex = Random.Range(i, remainingWords.Count);
+            remainingWords[i] = remainingWords[randomIndex];
+            remainingWords[randomIndex] = temp;
+        }
+    }
+
+    // 次の単語をランダム（シャッフル済みリストから順に）取得する
     void LoadNextWord()
     {
-        if (targetWords == null || targetWords.Count == 0)
+        // もし全部使い切ったら、再度プールを補充してシャッフルする
+        if (remainingWords.Count == 0)
         {
-            Debug.LogWarning("タイピング用の単語が登録されていません！");
-            return;
+            Debug.Log("すべての問題をクリアしました！新しくシャッフルしてループします。");
+            ResetAndShufflePool();
         }
 
-        // リストの範囲内で現在の単語を決定
-        if (currentWordIndex < targetWords.Count)
-        {
-            currentTargetWord = targetWords[currentWordIndex];
-            nextCharIndex = 0;
-            UpdateUI();
-        }
-        else
-        {
-            Debug.Log("すべての単語をクリアしました！ゲームクリア！");
-            if (typedTextUI != null)
-            {
-                typedTextUI.text = "<color=green>CLEAR!</color>";
-            }
-        }
+        // リストの先頭から1つ取り出して削除する
+        currentTargetWord = remainingWords[0];
+        remainingWords.RemoveAt(0);
+
+        nextCharIndex = 0;
+        UpdateUI();
+        Debug.Log($"次の問題: {currentTargetWord}");
     }
 
     // キーが踏まれて文字が渡されたとき
     public void AppendChar(char c)
     {
-        // すでに全単語クリアしていたら何もしない
-        if (currentWordIndex >= targetWords.Count) return;
+        if (string.IsNullOrEmpty(currentTargetWord)) return;
 
         // 次に入力すべき文字と一致しているかチェック（大文字小文字を無視）
         if (char.ToUpper(c) == char.ToUpper(currentTargetWord[nextCharIndex]))
@@ -72,10 +80,7 @@ public class TypingManager : MonoBehaviour
             if (nextCharIndex >= currentTargetWord.Length)
             {
                 Debug.Log($"単語「{currentTargetWord}」をクリアしました！");
-                currentWordIndex++; // 次の単語へインデックスを進める
-
-                // 少し遅らせて次の単語を読み込む（必要に応じてコルーチン等でもOKですが、即時切り替えます）
-                LoadNextWord();
+                LoadNextWord(); // 次の問題へ
             }
         }
         else
@@ -87,11 +92,10 @@ public class TypingManager : MonoBehaviour
     // 画面の表示を更新（一文字ずつ色を変える）
     void UpdateUI()
     {
-        if (typedTextUI != null && currentWordIndex < targetWords.Count)
+        if (typedTextUI != null && !string.IsNullOrEmpty(currentTargetWord))
         {
             if (nextCharIndex > 0)
             {
-                // 入力済みの部分を黄色（<color=yellow>）、残りを白（<color=white>）にする
                 string typedPart = "<color=yellow>" + currentTargetWord.Substring(0, nextCharIndex) + "</color>";
                 string untypedPart = "<color=white>" + currentTargetWord.Substring(nextCharIndex) + "</color>";
 
@@ -99,7 +103,6 @@ public class TypingManager : MonoBehaviour
             }
             else
             {
-                // 最初は全部白文字
                 typedTextUI.text = "<color=white>" + currentTargetWord + "</color>";
             }
         }
@@ -108,7 +111,7 @@ public class TypingManager : MonoBehaviour
     // リセット用
     public void ResetTyping()
     {
-        currentWordIndex = 0;
+        ResetAndShufflePool();
         LoadNextWord();
     }
 }
