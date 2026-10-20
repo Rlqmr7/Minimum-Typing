@@ -340,7 +340,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TypingManager
   typedTextUI: {fileID: 1552669353}
-  targetWord: ASD
+  targetWords:
+  - ASD
+  - UNITY
+  - C#, SCRIPT
 --- !u!4 &56315913
 Transform:
   m_ObjectHideFlags: 0
@@ -571,7 +574,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -0.0018, y: 0.0619}
-  m_SizeDelta: {x: 12.5336, y: 7.3101}
+  m_SizeDelta: {x: 14.25, y: 7.3101}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &160355905
 MonoBehaviour:
@@ -3629,7 +3632,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.16, y: 4.64}
-  m_SizeDelta: {x: 13.1632, y: 8.002}
+  m_SizeDelta: {x: 15.54, y: 8.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1149386202
 GameObject:
@@ -4748,6 +4751,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1552669352}
   - component: {fileID: 1552669354}
+  - component: {fileID: 1552669355}
   - component: {fileID: 1552669353}
   m_Layer: 5
   m_Name: MonitorTXT
@@ -4795,10 +4799,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ASD
+  m_text: Question
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9dcaad3b60bc267499e58bdc2cea9d50, type: 2}
+  m_sharedMaterial: {fileID: 6111081342176812082, guid: 9dcaad3b60bc267499e58bdc2cea9d50, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4875,6 +4879,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
   m_CullTransparentMesh: 1
+--- !u!114 &1552669355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552669351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f39ebd1a9d64d944eaf90c21b134e838, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RandomTextDisplay
+  textComponent: {fileID: 0}
+  textList:
+  - WAREWARE
+  - AREDARE
+  - TARE
+  - SARADA
+  - YARARETA
 --- !u!1 &1710724438
 GameObject:
   m_ObjectHideFlags: 0
@@ -6793,7 +6816,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.00020027, y: -0.00024986}
-  m_SizeDelta: {x: 13.164, y: 8.0015}
+  m_SizeDelta: {x: 15.49, y: 8.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2109190365
 MonoBehaviour:
