@@ -5,7 +5,9 @@ using UnityEngine.EventSystems; // UIのクリック検知に必要
 public class RandomTextDisplay : MonoBehaviour, IPointerClickHandler
 {
     public TMP_Text textComponent;
-    public string[] textList = new string[5] { "ワレワレ", "アレダレ", "タレ", "サラダ", "ヤラレタ" };
+
+    [TextArea(2, 5)] // ここを追加しました：Inspectorで複数行の入力と改行ができるようになります
+    public string[] textList = new string[5] { "WAREWARE", "AREDARE", "TARE", "SARADA", "YARARETA" };
 
     void Start()
     {
