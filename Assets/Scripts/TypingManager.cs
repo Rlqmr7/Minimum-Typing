@@ -2,15 +2,22 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(AudioSource))]
 public class TypingManager : MonoBehaviour
 {
     public static TypingManager Instance;
 
     [Header("UI設定")]
-    public TextMeshProUGUI typedTextUI; // モニターの文字を表示しているTextMeshPro
+    public TextMeshProUGUI typedTextUI;
 
     [Header("ゲーム設定（出題する単語プール）")]
     public List<string> targetWordsPool = new List<string> { "ASD", "UNITY", "C#", "GAME", "PLAYER" };
+
+    [Header("オーディオ設定（効果音）")]
+    public AudioClip correctKeySound;
+    public AudioClip incorrectKeySound;
+    public AudioClip clearSound;
+    private AudioSource audioSource;
 
     private List<string> remainingWords = new List<string>();
     private string currentTargetWord;
@@ -20,6 +27,8 @@ public class TypingManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -45,7 +54,6 @@ public class TypingManager : MonoBehaviour
     {
         if (remainingWords.Count == 0)
         {
-            Debug.Log("すべての問題をクリアしました！新しくシャッフルしてループします。");
             ResetAndShufflePool();
         }
 
@@ -54,27 +62,29 @@ public class TypingManager : MonoBehaviour
 
         nextCharIndex = 0;
         UpdateUI();
-        Debug.Log($"次の問題: {currentTargetWord}");
     }
 
     public void AppendChar(char c)
     {
         if (string.IsNullOrEmpty(currentTargetWord)) return;
 
+        // 正解の文字を入力した場合
         if (char.ToUpper(c) == char.ToUpper(currentTargetWord[nextCharIndex]))
         {
+            if (correctKeySound != null) audioSource.PlayOneShot(correctKeySound);
+
             nextCharIndex++;
             UpdateUI();
 
-            // 単語をクリアしたかチェック
+            // 単語をすべてクリアした場合
             if (nextCharIndex >= currentTargetWord.Length)
             {
-                Debug.Log($"単語「{currentTargetWord}」をクリア！");
+                if (clearSound != null) audioSource.PlayOneShot(clearSound);
 
-                // --- 独立したScoreManagerにスコア加算を頼む ---
+                // --- スコアマネージャーにクリアを通知（コンボ加算＆スコアアップ） ---
                 if (ScoreManager.Instance != null)
                 {
-                    ScoreManager.Instance.AddScore(10);
+                    ScoreManager.Instance.AddScoreOnClear();
                 }
 
                 LoadNextWord();
@@ -82,7 +92,15 @@ public class TypingManager : MonoBehaviour
         }
         else
         {
-            Debug.Log($"不正解のキーです ('{c}')");
+            // --- 不正解の場合：効果音を鳴らしてコンボをリセットする ---
+            if (incorrectKeySound != null) audioSource.PlayOneShot(incorrectKeySound);
+
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.ResetCombo();
+            }
+
+            Debug.Log($"不正解のキーです ('{c}') - コンボリセット");
         }
     }
 
@@ -106,6 +124,10 @@ public class TypingManager : MonoBehaviour
 
     public void ResetTyping()
     {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.ResetAll();
+        }
         ResetAndShufflePool();
         LoadNextWord();
     }
