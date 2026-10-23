@@ -5761,7 +5761,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1552669352}
   - component: {fileID: 1552669354}
-  - component: {fileID: 1552669355}
   - component: {fileID: 1552669353}
   m_Layer: 5
   m_Name: QuestionTXT
@@ -5889,25 +5888,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
   m_CullTransparentMesh: 1
---- !u!114 &1552669355
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1552669351}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f39ebd1a9d64d944eaf90c21b134e838, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RandomTextDisplay
-  textComponent: {fileID: 1552669353}
-  textList:
-  - 'WAREWARE '
-  - AREDARE
-  - TARE
-  - SARADA
-  - YARARETA
 --- !u!1 &1662426563
 GameObject:
   m_ObjectHideFlags: 0

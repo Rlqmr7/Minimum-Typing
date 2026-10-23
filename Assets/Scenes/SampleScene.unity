@@ -342,17 +342,10 @@ MonoBehaviour:
   typedTextUI: {fileID: 1552669353}
   targetWordsPool:
   - ASD
-<<<<<<< HEAD
   - QWE
   - ZXC
   - RT
   - FG
-=======
-  - UNITY
-  - C#
-  - GAME
-  - PLAYER
->>>>>>> af44d9bffac90161876c86abe810500e5728d634
 --- !u!4 &56315913
 Transform:
   m_ObjectHideFlags: 0
@@ -5122,7 +5115,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1552669352}
   - component: {fileID: 1552669354}
-  - component: {fileID: 1552669355}
   - component: {fileID: 1552669353}
   m_Layer: 5
   m_Name: MonitorTXT
@@ -5250,26 +5242,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
   m_CullTransparentMesh: 1
---- !u!114 &1552669355
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1552669351}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f39ebd1a9d64d944eaf90c21b134e838, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RandomTextDisplay
-  textComponent: {fileID: 1552669353}
-  textList:
-<<<<<<< HEAD
-  - WAREWARE
-  - AREDARE
-  - TARE
-  - SARADA
-  - YARARETA
 --- !u!1 &1706450525
 GameObject:
   m_ObjectHideFlags: 0
@@ -5407,13 +5379,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1706450525}
   m_CullTransparentMesh: 1
-=======
-  - "WAREWARE\n\u30EF\u30EC\u30EF\u30EC"
-  - "AREDARE\n\u3042\u308C\u3060\u308C"
-  - "TARE\n\u305F\u308C"
-  - "SARADA\n\u30B5\u30E9\u30C0"
-  - "YARARETA\n\u3084\u3089\u308C\u305F"
->>>>>>> af44d9bffac90161876c86abe810500e5728d634
 --- !u!1 &1710724438
 GameObject:
   m_ObjectHideFlags: 0
