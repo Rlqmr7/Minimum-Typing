@@ -17,6 +17,10 @@ public class PlayerController : MonoBehaviour
     [Header("ジャンプ・ヒップドロップ設定")]
     public float jumpForce = 8f;
     public float hipDropForce = 50f;
+
+    [Header("滞空時間調整（落下・重力強化）")]
+    public float gravityMultiplier = 2.5f; // 値が大きいほど素早く落ちます（デフォルトは2.0〜3.0あたりがおすすめ）
+
     private bool isGrounded;
     private bool isHipDropping = false;
 
@@ -55,8 +59,6 @@ public class PlayerController : MonoBehaviour
         // --- 通常の地面に着地した場合のヒップドロップ終了 ---
         if (isHipDropping && isGrounded)
         {
-            // 真下にあるのが「PhysicalKey」でなければ、通常通りヒップドロップ終了
-            // （キーの上に着地したときは、PhysicalKey側の判定に任せるためここでは消さない）
             RaycastHit hit;
             if (Physics.Raycast(transform.position, Vector3.down, out hit, rayDistance))
             {
@@ -65,7 +67,6 @@ public class PlayerController : MonoBehaviour
                     isHipDropping = false;
                     rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
-                    // 着地した瞬間に砂煙を再生！
                     if (dustEffect != null)
                     {
                         dustEffect.Play();
@@ -92,6 +93,13 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        // --- 滞空時間を短くするため、空中（非接地時）のときに余分に下方向の力を加える ---
+        if (!isGrounded && !isHipDropping)
+        {
+            // 標準の重力に加えて、さらに下向きの力を加えることで落下スピードを速くする
+            rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
+        }
+
         if (isHipDropping) return;
 
         bool isDashing = Gamepad.current != null && Gamepad.current.rightShoulder.isPressed;
@@ -112,7 +120,6 @@ public class PlayerController : MonoBehaviour
         Debug.Log("ヒップドロップ！");
     }
 
-    // --- キー側（PhysicalKey）から呼ばれてヒップドロップを安全に終了させるメソッド ---
     public void EndHipDrop()
     {
         if (isHipDropping)
@@ -120,7 +127,6 @@ public class PlayerController : MonoBehaviour
             isHipDropping = false;
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
-            // キー上で着地したときも砂煙を出す
             if (dustEffect != null)
             {
                 dustEffect.Play();
