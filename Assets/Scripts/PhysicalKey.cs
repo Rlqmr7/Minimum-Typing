@@ -10,6 +10,11 @@ public class PhysicalKey : MonoBehaviour
     public float moveSpeed = 20f;      // 沈む・戻るスピード
     public float bounceVelocity = 8f;  // 踏んだ後にプレイヤーを跳ね返す上方向の速度
 
+    [Header("発光（マテリアル）設定")]
+    public Renderer keyRenderer;       // 色を変えるRenderer（未指定なら自動取得）
+    public Material normalMaterial;    // 通常時のマテリアル
+    public Material emissionMaterial;  // 光っている時のマテリアル
+
     private Vector3 defaultLocalPos;
     private Vector3 pressedLocalPos;
     private bool isPressed = false;
@@ -21,17 +26,32 @@ public class PhysicalKey : MonoBehaviour
             visualMesh = transform;
         }
 
+        // Rendererが未設定なら自動で取得
+        if (keyRenderer == null)
+        {
+            keyRenderer = visualMesh.GetComponent<Renderer>();
+        }
+
+        // 初期マテリアルを通常状態に設定
+        if (keyRenderer != null && normalMaterial != null)
+        {
+            keyRenderer.material = normalMaterial;
+        }
+
         defaultLocalPos = visualMesh.localPosition;
         pressedLocalPos = defaultLocalPos - new Vector3(0, pressDepth, 0);
     }
 
-    // 「通常の物理衝突（OnCollisionEnter）」を使うことで、キーの上に乗ることができます
+    // プレイヤーがキーに乗ったとき
     private void OnCollisionEnter(Collision collision)
     {
         PlayerController player = collision.gameObject.GetComponent<PlayerController>();
         if (player != null)
         {
-            // 完全に「ヒップドロップ中」かつ「上から踏んだ場合」のみ反応
+            // 乗っている間は常に光らせる
+            SetEmission(true);
+
+            // 完全に「ヒップドロップ中」かつ「上から踏んだ場合」の判定
             if (player.IsHipDropping && collision.transform.position.y > transform.position.y + 0.05f)
             {
                 PressKey();
@@ -42,6 +62,33 @@ public class PhysicalKey : MonoBehaviour
                 {
                     playerRb.linearVelocity = new Vector3(playerRb.linearVelocity.x, bounceVelocity, playerRb.linearVelocity.z);
                 }
+            }
+        }
+    }
+
+    // プレイヤーがキーから離れたとき
+    private void OnCollisionExit(Collision collision)
+    {
+        PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+        if (player != null)
+        {
+            // 離れたら光を消す
+            SetEmission(false);
+        }
+    }
+
+    private void SetEmission(bool isOn)
+    {
+        if (keyRenderer != null)
+        {
+            // 光らせるマテリアルが設定されている場合のみ切り替え
+            if (isOn && emissionMaterial != null)
+            {
+                keyRenderer.material = emissionMaterial;
+            }
+            else if (!isOn && normalMaterial != null)
+            {
+                keyRenderer.material = normalMaterial;
             }
         }
     }
@@ -64,7 +111,7 @@ public class PhysicalKey : MonoBehaviour
     {
         isPressed = true;
 
-        // 1. 沈み込み（見た目のメッシュだけが動くので、親のコライダーはビクともせずスタックしない）
+        // 1. 沈み込み
         float time = 0f;
         while (time < 1f)
         {
