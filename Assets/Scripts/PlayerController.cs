@@ -17,14 +17,21 @@ public class PlayerController : MonoBehaviour
     [Header("ジャンプ・ヒップドロップ設定")]
     public float jumpForce = 8f;
     public float hipDropForce = 50f;
+    public float hipDropRecoveryTime = 1.0f; // ★ ヒップドロップ後の硬直時間（秒）
+    private float recoveryTimer = 0f;          // ★ 硬直の残り時間
+
+    [Header("滞空時間調整（落下・重力強化）")]
+    public float gravityMultiplier = 2.5f;
+
     private bool isGrounded;
     private bool isHipDropping = false;
 
-    // 外部（PhysicalKey）からヒップドロップ中か確認できるようにするプロパティ
     public bool IsHipDropping => isHipDropping;
+    // ★ 現在硬直中かどうかを確認できるプロパティ
+    public bool IsRecovering => recoveryTimer > 0f;
 
     [Header("エフェクト設定")]
-    public ParticleSystem dustEffect; // 砂煙のパーティクル
+    public ParticleSystem dustEffect;
 
     void Awake()
     {
@@ -32,7 +39,6 @@ public class PlayerController : MonoBehaviour
         col = GetComponent<CapsuleCollider>();
         rb.freezeRotation = true;
 
-        // もしインスペクターで割り当てていなければ自動取得
         if (dustEffect == null)
         {
             dustEffect = GetComponentInChildren<ParticleSystem>();
@@ -46,6 +52,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // ★ 硬直中のタイマーを進める
+        if (recoveryTimer > 0f)
+        {
+            recoveryTimer -= Time.deltaTime;
+        }
+
         // --- 接地判定 ---
         float rayDistance = col.height / 2f + 0.1f;
         isGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance);
@@ -55,28 +67,19 @@ public class PlayerController : MonoBehaviour
         // --- 通常の地面に着地した場合のヒップドロップ終了 ---
         if (isHipDropping && isGrounded)
         {
-            // 真下にあるのが「PhysicalKey」でなければ、通常通りヒップドロップ終了
-            // （キーの上に着地したときは、PhysicalKey側の判定に任せるためここでは消さない）
             RaycastHit hit;
             if (Physics.Raycast(transform.position, Vector3.down, out hit, rayDistance))
             {
                 if (hit.collider.GetComponent<PhysicalKey>() == null)
                 {
-                    isHipDropping = false;
-                    rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-
-                    // 着地した瞬間に砂煙を再生！
-                    if (dustEffect != null)
-                    {
-                        dustEffect.Play();
-                    }
-                    Debug.Log("着地！ヒップドロップ終了＆砂煙再生！");
+                    EndHipDropProcess(); // ★ 共通の終了処理にまとめる
                 }
             }
         }
 
         // --- Aボタン（Jump / HipDrop）の入力判定 ---
-        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
+        // ★ 硬直中（recoveryTimer > 0）はジャンプやヒップドロップを受け付けないようにする
+        if (recoveryTimer <= 0f && Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
         {
             if (isGrounded)
             {
@@ -92,7 +95,14 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isHipDropping) return;
+        // --- 滞空時間を短くするため、空中（非接地時）のときに余分に下方向の力を加える ---
+        if (!isGrounded && !isHipDropping)
+        {
+            rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
+        }
+
+        // ★ ヒップドロップ中、または硬直中（1秒間の静止）は移動入力を反映させない
+        if (isHipDropping || recoveryTimer > 0f) return;
 
         bool isDashing = Gamepad.current != null && Gamepad.current.rightShoulder.isPressed;
         float currentMaxSpeed = isDashing ? maxSpeed * dashSpeedMultiplier : maxSpeed;
@@ -107,25 +117,33 @@ public class PlayerController : MonoBehaviour
     void StartHipDrop()
     {
         isHipDropping = true;
+        recoveryTimer = 0f; // 開始時は硬直をリセット
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.down * hipDropForce, ForceMode.Impulse);
         Debug.Log("ヒップドロップ！");
     }
 
-    // --- キー側（PhysicalKey）から呼ばれてヒップドロップを安全に終了させるメソッド ---
     public void EndHipDrop()
     {
         if (isHipDropping)
         {
-            isHipDropping = false;
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
-
-            // キー上で着地したときも砂煙を出す
-            if (dustEffect != null)
-            {
-                dustEffect.Play();
-            }
+            EndHipDropProcess();
             Debug.Log("キーを踏んでヒップドロップ終了＆砂煙再生！");
+        }
+    }
+
+    // ★ ヒップドロップ終了時の処理をまとめたヘルパーメソッド
+    private void EndHipDropProcess()
+    {
+        isHipDropping = false;
+        rb.linearVelocity = Vector3.zero; // 着地時の余分な滑りを止めるために完全に速度を0にする場合（必要に応じて調整してください）
+
+        // 硬直タイマーをセット（ここで1秒間静止させる）
+        recoveryTimer = hipDropRecoveryTime;
+
+        if (dustEffect != null)
+        {
+            dustEffect.Play();
         }
     }
 }
