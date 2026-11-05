@@ -4,7 +4,7 @@ using System.Collections;
 public class PhysicalKey : MonoBehaviour
 {
     [Header("キーの設定")]
-    public char keyValue = 'A';
+    public char keyValue = 'a';        // このキーが担当する文字（インスペクターでは小文字推奨）
     public Transform visualMesh;       // 沈ませる見た目のオブジェクト（子オブジェクト）
     public float pressDepth = 0.1f;    // 沈む深さ
     public float moveSpeed = 20f;      // 沈む・戻るスピード
@@ -98,11 +98,24 @@ public class PhysicalKey : MonoBehaviour
         if (!isPressed)
         {
             StartCoroutine(PressRoutine());
-            Debug.Log($"キー [{keyValue}] がヒップドロップで押されました！");
 
+            // ★ ShiftキーがONかどうかで大文字・小文字を動的に切り替える
+            char charToSend = keyValue;
+            if (ShiftKey.IsShiftPressed)
+            {
+                charToSend = char.ToUpper(keyValue);
+                Debug.Log($"<color=magenta>【文字入力 (大文字)】 キー [{charToSend}] がヒップドロップで押されました！ (Shift: ON)</color>");
+            }
+            else
+            {
+                charToSend = char.ToLower(keyValue);
+                Debug.Log($"<color=green>【文字入力 (小文字)】 キー [{charToSend}] がヒップドロップで押されました！ (Shift: OFF)</color>");
+            }
+
+            // TypingManager に送信してUIの判定を進める
             if (TypingManager.Instance != null)
             {
-                TypingManager.Instance.AppendChar(keyValue);
+                TypingManager.Instance.AppendChar(charToSend);
             }
         }
     }

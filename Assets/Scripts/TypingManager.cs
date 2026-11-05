@@ -14,7 +14,7 @@ public class TypingManager : MonoBehaviour
     public struct WordData
     {
         [TextArea(2, 4)]
-        public string text; // 1行目にローマ字、2行目に日本語を入力
+        public string text; // 1行目にローマ字、2行目に日本語
     }
 
     [Header("ゲーム設定（出題する単語プール）")]
@@ -35,8 +35,8 @@ public class TypingManager : MonoBehaviour
     private List<WordData> remainingWords = new List<WordData>();
     private WordData currentWordData;
 
-    private string typingTargetWord; // タイピング判定するローマ字部分
-    private string displaySubText;   // 下に表示する日本語部分
+    private string typingTargetWord;
+    private string displaySubText;
     private int nextCharIndex = 0;
 
     void Awake()
@@ -78,12 +78,11 @@ public class TypingManager : MonoBehaviour
             currentWordData = remainingWords[0];
             remainingWords.RemoveAt(0);
 
-            // 改行区切りで「1行目（ローマ字）」と「2行目（日本語）」に分解する
             string[] lines = currentWordData.text.Split(new char[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
 
             if (lines.Length > 0)
             {
-                typingTargetWord = lines[0].Trim(); // タイピング対象は1行目
+                typingTargetWord = lines[0].Trim();
             }
             else
             {
@@ -92,7 +91,7 @@ public class TypingManager : MonoBehaviour
 
             if (lines.Length > 1)
             {
-                displaySubText = lines[1].Trim(); // 下の日本語部分
+                displaySubText = lines[1].Trim();
             }
             else
             {
@@ -108,15 +107,14 @@ public class TypingManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(typingTargetWord)) return;
 
-        // 正解の文字を入力した場合
-        if (char.ToUpper(c) == char.ToUpper(typingTargetWord[nextCharIndex]))
+        // ★ 大文字・小文字を厳密に区別して判定
+        if (c == typingTargetWord[nextCharIndex])
         {
             if (correctKeySound != null) audioSource.PlayOneShot(correctKeySound);
 
             nextCharIndex++;
             UpdateUI();
 
-            // ローマ字をすべて入力し終えた場合（クリア）
             if (nextCharIndex >= typingTargetWord.Length)
             {
                 if (clearSound != null) audioSource.PlayOneShot(clearSound);
@@ -131,7 +129,6 @@ public class TypingManager : MonoBehaviour
         }
         else
         {
-            // --- 不正解の場合 ---
             if (incorrectKeySound != null) audioSource.PlayOneShot(incorrectKeySound);
 
             if (ScoreManager.Instance != null)
@@ -162,7 +159,6 @@ public class TypingManager : MonoBehaviour
 
             string line1 = typedPart + untypedPart;
 
-            // 2行目（日本語）がある場合は改行して表示する
             if (!string.IsNullOrEmpty(displaySubText))
             {
                 typedTextUI.text = line1 + "\n<color=white>" + displaySubText + "</color>";
