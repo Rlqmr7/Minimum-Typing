@@ -1,10 +1,11 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement; // シーン遷移に必要
 
 public class GameTimer : MonoBehaviour
 {
     [Header("UI設定")]
-    public TextMeshProUGUI timerText; // 左上の「残り30秒」などを表示するTextMeshPro
+    public TextMeshProUGUI timerText; // 左上の残り時間を表示するTextMeshPro
 
     [Header("タイマー設定")]
     public float timeLimit = 180f;    // 3分 = 180秒
@@ -40,11 +41,10 @@ public class GameTimer : MonoBehaviour
     {
         if (timerText != null)
         {
-            // 分と秒を計算（例: 2分15秒）
+            // 分と秒を計算
             int minutes = Mathf.FloorToInt(currentTime / 60f);
             int seconds = Mathf.FloorToInt(currentTime % 60f);
 
-            // 「残り 2分15秒」または「残り 135秒」の形式で表示
             if (minutes > 0)
             {
                 timerText.text = $"残り {minutes}m {seconds:00}s";
@@ -59,8 +59,21 @@ public class GameTimer : MonoBehaviour
     // 時間切れになったときの処理
     void OnTimeUp()
     {
-        Debug.Log("タイムアップ！ゲーム終了");
-        // TODO: ゲームオーバー画面の表示や、タイピング入力をストップする処理をここに書きます
+        Debug.Log("タイムアップ！リザルト画面に移動します");
+
+        // --- ScoreManagerから現在のスコアを取得して保存する ---
+        int finalScore = 0;
+        if (ScoreManager.Instance != null)
+        {
+            finalScore = ScoreManager.Instance.GetScore();
+        }
+
+        PlayerPrefs.SetInt("PlayerScore", finalScore);
+        PlayerPrefs.Save(); // 保存を確定
+        // --------------------------------------------------
+
+        // リザルト画面（ResultScene）へシーン遷移
+        SceneManager.LoadScene("ResultScene");
     }
 
     // 外からタイマーをリスタートさせたい時用
