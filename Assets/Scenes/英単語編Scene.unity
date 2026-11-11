@@ -933,7 +933,7 @@ GameObject:
   - component: {fileID: 434634771}
   - component: {fileID: 434634770}
   m_Layer: 5
-  m_Name: MonitorCamvas
+  m_Name: Monitor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3136,7 +3136,7 @@ RectTransform:
   m_GameObject: {fileID: 875618043}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.099, y: 1.099, z: 1.099}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1224069018}
@@ -3144,7 +3144,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -0.0047718, y: -0.0061278}
   m_SizeDelta: {x: 16.2, y: 8.0015}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &875618045

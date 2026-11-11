@@ -455,7 +455,7 @@ RectTransform:
   m_GameObject: {fileID: 1466484029}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8798, y: 0.9012671, z: 0.8798}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2109297890}
@@ -485,7 +485,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30BF\u30A4\u30C8\u30EB"
+  m_text: "\u30DF\u30CB\u30DE\u30E0\u30BF\u30A4\u30D4\u30F3\u30B0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9dcaad3b60bc267499e58bdc2cea9d50, type: 2}
   m_sharedMaterial: {fileID: 6111081342176812082, guid: 9dcaad3b60bc267499e58bdc2cea9d50, type: 2}
@@ -512,8 +512,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
-  m_fontSizeBase: 50
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

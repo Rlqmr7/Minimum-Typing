@@ -332,11 +332,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TypingManager
   typedTextUI: {fileID: 1552669353}
   targetWordsPool:
-  - text: "wareware\n\u308F\u308C\u308F\u308C"
+  - text: "wareware\n\u30EF\u30EC\u30EF\u30EC"
   - text: "tare\n\u305F\u308C"
-  - text: "sarada\n\u3055\u3089\u3060"
+  - text: "sarada\n\u30B5\u30E9\u30C0"
   - text: "wareta\n\u308F\u308C\u305F"
   - text: "dareda\n\u3060\u308C\u3060"
+  - text: "wasabi\n\u308F\u3055\u3073"
+  - text: "babaa\n\u3070\u3070\u3042"
+  - text: "abara\n\u3042\u3070\u3089"
+  - text: "tabeta\n\u98DF\u3079\u305F"
   correctKeySound: {fileID: 0}
   incorrectKeySound: {fileID: 0}
   clearSound: {fileID: 0}
