@@ -2141,7 +2141,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -821, y: 373}
+  m_AnchoredPosition: {x: -760, y: 373}
   m_SizeDelta: {x: 332.767, y: 192.637}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &592182860
@@ -2356,19 +2356,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: jumpForce
-      value: 20
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: gravityMultiplier
-      value: 2.5
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: dashSpeedMultiplier
-      value: 1.5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: hipDropRecoveryTime
-      value: 0.7
+      value: 0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4861,6 +4861,10 @@ PrefabInstance:
     - target: {fileID: 7003361114971338991, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: m_DefaultControlScheme
       value: Gamepad
+      objectReference: {fileID: 0}
+    - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
+      propertyPath: hipDropRecoveryTime
+      value: 0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

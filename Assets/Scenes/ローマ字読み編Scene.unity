@@ -450,7 +450,6 @@ MonoBehaviour:
   - text: "sarada\n\u30B5\u30E9\u30C0"
   - text: "wareta\n\u308F\u308C\u305F"
   - text: "dareda\n\u3060\u308C\u3060"
-  - text: "wasabi\n\u308F\u3055\u3073"
   - text: "abara\n\u3042\u3070\u3089"
   - text: "tabeta\n\u98DF\u3079\u305F"
   correctKeySound: {fileID: 0}
@@ -2624,6 +2623,10 @@ PrefabInstance:
       propertyPath: m_DefaultControlScheme
       value: Gamepad
       objectReference: {fileID: 0}
+    - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
+      propertyPath: hipDropRecoveryTime
+      value: 0.4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -4487,7 +4490,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameTimer
   timerText: {fileID: 119734615}
-  timeLimit: 180
+  timeLimit: 120
 --- !u!4 &976923611
 Transform:
   m_ObjectHideFlags: 0
@@ -7121,7 +7124,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -821, y: 373}
+  m_AnchoredPosition: {x: -760, y: 373}
   m_SizeDelta: {x: 332.767, y: 192.637}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1892511591
@@ -7649,6 +7652,10 @@ PrefabInstance:
     - target: {fileID: 7003361114971338991, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
       propertyPath: m_DefaultControlScheme
       value: Gamepad
+      objectReference: {fileID: 0}
+    - target: {fileID: 9011854486494710556, guid: 045b5e62de1f1304a8f4fbd42595f4b8, type: 3}
+      propertyPath: hipDropRecoveryTime
+      value: 0.4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
