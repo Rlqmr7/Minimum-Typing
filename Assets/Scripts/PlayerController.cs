@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
         Vector2 rawInput = value.Get<Vector2>();
 
         // ★ ここでコンソールに入力が届いているか確認する
-        Debug.Log("入力値: " + rawInput);
+       // Debug.Log("入力値: " + rawInput);
 
         if (rawInput.magnitude < 0.05f)
         {
