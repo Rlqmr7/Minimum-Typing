@@ -5541,13 +5541,51 @@ MonoBehaviour:
   - text: "arrest\n\u902E\u6355\u3059\u308B"
   - text: "target\n\u76EE\u6A19"
   - text: "sweet\n\u7518\u3044"
-  - text: "agree\n\u540C\u610F\u3059\u308B"
   - text: "cat\n\u732B"
-  - text: "car\n\u8ECA"
-  - text: "bag\n\u9784"
   - text: "dear\n\u89AA\u611B\u306A\u308B"
   - text: "face\n\u9854"
   - text: "zebra\n\u30B7\u30DE\u30A6\u30DE"
+  - text: "element\n\u8981\u7D20"
+  - text: "dynamic\n\u52D5\u7684"
+  - text: "horizon\n\u5730\u5E73\u7DDA"
+  - text: "eclipse\n\u65E5\u98DF\u30FB\u6708\u98DF"
+  - text: "velocity\n\u901F\u5EA6"
+  - text: "critical\n\u4F1A\u5FC3"
+  - text: "shockwave\n\u885D\u6483\u6CE2"
+  - text: "impact\n\u885D\u6483"
+  - text: "infinity\n\u7121\u9650"
+  - text: "gravity\n\u91CD\u529B"
+  - text: "quantum\n\u91CF\u5B50"
+  - text: "blizzard\n\u731B\u5439\u96EA"
+  - text: "algorithm\n\u30A2\u30EB\u30B4\u30EA\u30BA\u30E0"
+  - text: "rhythm\n\u30EA\u30BA\u30E0"
+  - text: "zeppelin\n\u98DB\u884C\u8239"
+  - text: "quickly\n\u7D20\u65E9\u304F"
+  - text: "quality\n\u54C1\u8CEA"
+  - text: "liquid\n\u6DB2\u4F53"
+  - text: "crystal\n\u7D50\u6676"
+  - text: "miracle\n\u5947\u8DE1"
+  - text: "quest\n\u5192\u967A"
+  - text: "maximize\n\u6700\u5927\u5316\u3059\u308B"
+  - text: "matrix\n\u884C\u5217"
+  - text: "pixel\n\u753B\u7D20"
+  - text: "puzzle\n\u30D1\u30BA\u30EB"
+  - text: "potential\n\u53EF\u80FD\u6027"
+  - text: "complex\n\u8907\u96D1\u306A"
+  - text: "culture\n\u6587\u5316"
+  - text: "increase\n\u5897\u52A0\u3059\u308B"
+  - text: "decrease\n\u6E1B\u5C11\u3059\u308B"
+  - text: "congratulations\n\u304A\u3081\u3067\u3068\u3046"
+  - text: "overvome\n\u514B\u670D\u3059\u308B"
+  - text: "environment\n\u74B0\u5883"
+  - text: "generation\n\u4E16\u4EE3"
+  - text: "experiment\n\u5B9F\u9A13"
+  - text: "influence\n\u5F71\u97FF"
+  - text: "advantage\n\u5229\u70B9\u30FB\u6709\u5229"
+  - text: "sunday\n\u65E5\u66DC\u65E5"
+  - text: "wednesday\n\u6C34\u66DC\u65E5"
+  - text: "may\n5\u6708"
+  - text: "november\n11\u6708"
   correctKeySound: {fileID: 0}
   incorrectKeySound: {fileID: 0}
   clearSound: {fileID: 0}
@@ -6222,6 +6260,51 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1254156036}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1252259579
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1252259581}
+  - component: {fileID: 1252259580}
+  m_Layer: 0
+  m_Name: EscaprManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1252259580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252259579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfa6d1a3a1b492b4fac5f7f6e2eeb609, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeManager
+  titleSceneName: TitleScene
+--- !u!4 &1252259581
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1252259579}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.16513, y: 1, z: 5.06223}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1254156035
@@ -12752,6 +12835,7 @@ SceneRoots:
   - {fileID: 1799813057}
   - {fileID: 1088186780}
   - {fileID: 731759776}
+  - {fileID: 1252259581}
   - {fileID: 1702386140}
   - {fileID: 434634769}
   - {fileID: 852657208}
