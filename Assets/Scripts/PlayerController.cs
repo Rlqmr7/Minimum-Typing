@@ -3,13 +3,13 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
-[RequireComponent(typeof(PlayerInput))] // ★ PlayerInputを必須にする
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
     private Vector2 moveInput;
     private Rigidbody rb;
     private CapsuleCollider col;
-    private PlayerInput playerInput; // ★ どのプレイヤー（プレイヤー1、プレイヤー2）か識別するコンポーネント
+    private PlayerInput playerInput;
 
     [Header("移動設定")]
     public float moveForce = 35f;
@@ -19,20 +19,33 @@ public class PlayerController : MonoBehaviour
     [Header("ジャンプ・ヒップドロップ設定")]
     public float jumpForce = 8f;
     public float hipDropForce = 50f;
-    public float hipDropRecoveryTime = 1.0f;
+    public float hipDropRecoveryTime = 0.5f;
+    public float groundCheckDistance = 0.2f;
+    public LayerMask groundLayer = ~0;
     private float recoveryTimer = 0f;
+    private float jumpLockTimer = 0f;
 
     [Header("滞空時間調整（落下・重力強化）")]
     public float gravityMultiplier = 2.5f;
+
+    [Header("モデル・アニメーション設定")]
+    public Animator animator;
+    public Transform modelTransform;
+    public float turnSpeed = 12f;
+
+    [Header("エフェクト設定")]
+    public ParticleSystem dustEffect;
 
     private bool isGrounded;
     private bool isHipDropping = false;
 
     public bool IsHipDropping => isHipDropping;
     public bool IsRecovering => recoveryTimer > 0f;
+    public bool IsGrounded => isGrounded;
 
-    [Header("エフェクト設定")]
-    public ParticleSystem dustEffect;
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
+    private static readonly int IsHipDroppingHash = Animator.StringToHash("IsHipDropping");
+    private static readonly int IsRecoveringHash = Animator.StringToHash("IsRecovering");
 
     void Awake()
     {
@@ -45,46 +58,59 @@ public class PlayerController : MonoBehaviour
         {
             dustEffect = GetComponentInChildren<ParticleSystem>();
         }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (modelTransform == null && animator != null)
+        {
+            modelTransform = animator.transform;
+        }
     }
 
-    // PlayerInput コンポーネントから自動で呼ばれる
+    // PlayerInput コンポーネントから自動で呼ばれる（Move アクション用）
     public void OnMove(InputValue value)
     {
         Vector2 rawInput = value.Get<Vector2>();
+        moveInput = rawInput.magnitude < 0.05f ? Vector2.zero : rawInput;
+    }
 
-        // ★ ここでコンソールに入力が届いているか確認する
-       // Debug.Log("入力値: " + rawInput);
+    // PlayerInput コンポーネントから自動で呼ばれる（Jump アクション用）
+    public void OnJump(InputValue value)
+    {
+        if (!value.isPressed || recoveryTimer > 0f) return;
 
-        if (rawInput.magnitude < 0.05f)
+        // 接地中かつヒップドロップ中でないときだけジャンプ
+        if (isGrounded && !isHipDropping && jumpLockTimer <= 0f)
         {
-            moveInput = Vector2.zero;
-        }
-        else
-        {
-            moveInput = rawInput;
+            isGrounded = false;
+            jumpLockTimer = 0.15f;
+
+            Vector3 vel = rb.linearVelocity;
+            vel.y = 0f;
+            rb.linearVelocity = vel;
+
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
 
-    // PlayerInput からボタンが押されたときに呼ばれるアクション（後述の設定用）
-    public void OnJumpOrHipDrop(InputValue value)
+    // PlayerInput コンポーネントから自動で呼ばれる（HipDrop / ZR アクション用）
+    public void OnHipDrop(InputValue value)
     {
-        if (value.isPressed && recoveryTimer <= 0f)
+        if (!value.isPressed || recoveryTimer > 0f) return;
+
+        // 空中かつヒップドロップ中でないときだけヒップドロップ開始
+        if (!isGrounded && !isHipDropping)
         {
-            if (isGrounded)
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                isHipDropping = false;
-            }
-            else if (!isHipDropping)
-            {
-                StartHipDrop();
-            }
+            StartHipDrop();
         }
     }
 
     public void OnDash(InputValue value)
     {
-        // ダッシュボタンが押されているかどうかの判定用などとして拡張可能
+        // ダッシュボタン単体押下時の拡張用
     }
 
     void Update()
@@ -94,22 +120,40 @@ public class PlayerController : MonoBehaviour
             recoveryTimer -= Time.deltaTime;
         }
 
-        float rayDistance = col.height / 2f + 0.1f;
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, rayDistance);
-
-        Debug.DrawRay(transform.position, Vector3.down * rayDistance, isGrounded ? Color.red : Color.blue);
-
-        if (isHipDropping && isGrounded)
+        if (jumpLockTimer > 0f)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, Vector3.down, out hit, rayDistance))
-            {
-                if (hit.collider.GetComponent<PhysicalKey>() == null)
-                {
-                    EndHipDropProcess();
-                }
-            }
+            jumpLockTimer -= Time.deltaTime;
         }
+
+        CheckGrounded();
+        UpdateModelRotationAndAnimation();
+    }
+
+    private void CheckGrounded()
+    {
+        if (jumpLockTimer > 0f)
+        {
+            isGrounded = false;
+            Debug.DrawRay(GetGroundRayOrigin(), Vector3.down * (groundCheckDistance + 0.05f), Color.blue);
+            return;
+        }
+
+        Vector3 origin = GetGroundRayOrigin();
+        float rayLength = groundCheckDistance + 0.05f;
+        isGrounded = Physics.Raycast(origin, Vector3.down, rayLength, groundLayer, QueryTriggerInteraction.Ignore);
+
+        Debug.DrawRay(origin, Vector3.down * rayLength, isGrounded ? Color.red : Color.blue);
+    }
+
+    private Vector3 GetGroundRayOrigin()
+    {
+        if (col == null) return transform.position + Vector3.up * 0.05f;
+
+        return new Vector3(
+            col.bounds.center.x,
+            col.bounds.min.y + 0.05f,
+            col.bounds.center.z
+        );
     }
 
     void FixedUpdate()
@@ -121,9 +165,6 @@ public class PlayerController : MonoBehaviour
 
         if (isHipDropping || recoveryTimer > 0f) return;
 
-        // Gamepad.current ではなく、このプレイヤーに割り当てられたデバイスからダッシュ入力を取ることもできますが、
-        // 簡易的に各プレイヤーの右肩ボタン（または特定の判定）にしたい場合は Input System の Actions を使います。
-        // ここでは便宜上、既存のロジックを維持しつつ調整します。
         bool isDashing = false;
         if (playerInput.devices.Count > 0 && playerInput.devices[0] is Gamepad pad)
         {
@@ -138,19 +179,43 @@ public class PlayerController : MonoBehaviour
 
         Vector3 targetVelocity = new Vector3(moveInput.x * currentMaxSpeed, rb.linearVelocity.y, moveInput.y * currentMaxSpeed);
         Vector3 velocityChange = targetVelocity - rb.linearVelocity;
-        velocityChange.y = 0;
+        velocityChange.y = 0f;
 
         rb.AddForce(velocityChange, ForceMode.VelocityChange);
+    }
+
+    private void UpdateModelRotationAndAnimation()
+    {
+        Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        float speed = horizontalVel.magnitude;
+
+        if (speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(horizontalVel.normalized, Vector3.up);
+            modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRot, turnSpeed * Time.deltaTime);
+        }
+
+        if (animator != null)
+        {
+            animator.SetFloat(SpeedHash, speed);
+            animator.SetBool(IsHipDroppingHash, isHipDropping);
+            animator.SetBool(IsRecoveringHash, recoveryTimer > 0f);
+        }
     }
 
     void StartHipDrop()
     {
         isHipDropping = true;
         recoveryTimer = 0f;
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        Vector3 vel = rb.linearVelocity;
+        vel.y = 0f;
+        rb.linearVelocity = vel;
+
         rb.AddForce(Vector3.down * hipDropForce, ForceMode.Impulse);
     }
 
+    // PhysicalKey.cs から呼ばれる終了処理
     public void EndHipDrop()
     {
         if (isHipDropping)
@@ -162,12 +227,20 @@ public class PlayerController : MonoBehaviour
     private void EndHipDropProcess()
     {
         isHipDropping = false;
-        rb.linearVelocity = Vector3.zero;
         recoveryTimer = hipDropRecoveryTime;
 
         if (dustEffect != null)
         {
             dustEffect.Play();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // PhysicalKey 以外の地面・床にヒップドロップ着地したときの処理
+        if (isHipDropping && collision.gameObject.GetComponent<PhysicalKey>() == null)
+        {
+            EndHipDropProcess();
         }
     }
 }
