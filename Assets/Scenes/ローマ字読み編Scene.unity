@@ -313,7 +313,7 @@ GameObject:
   - component: {fileID: 36971983}
   - component: {fileID: 36971982}
   m_Layer: 0
-  m_Name: Cube (3)
+  m_Name: wall West
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -445,13 +445,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TypingManager
   typedTextUI: {fileID: 1552669353}
   targetWordsPool:
-  - text: "wareware\n\u30EF\u30EC\u30EF\u30EC"
+  - text: "warewareha\n\u30EF\u30EC\u30EF\u30EC\u30CF"
   - text: "tare\n\u305F\u308C"
   - text: "sarada\n\u30B5\u30E9\u30C0"
-  - text: "wareta\n\u308F\u308C\u305F"
   - text: "dareda\n\u3060\u308C\u3060"
   - text: "abara\n\u3042\u3070\u3089"
   - text: "tabeta\n\u98DF\u3079\u305F"
+  - text: "asahi\n\u3042\u3055\u3072"
+  - text: "yamabiko\n\u3084\u307E\u3073\u3053"
+  - text: "sazanami\n\u3055\u3056\u306A\u307F"
+  - text: "hidamari\n\u3072\u3060\u307E\u308A"
+  - text: "umikaze\n\u3046\u307F\u304B\u305C"
+  - text: "komorebi\n\u3053\u3082\u308C\u3073"
+  - text: "hoshizora\n\u307B\u3057\u305E\u3089"
+  - text: "aoisora\n\u3042\u304A\u3044\u305D\u3089"
+  - text: "natsuyasumi\n\u306A\u3064\u3084\u3059\u307F"
+  - text: "shunkan\n\u3057\u3085\u3093\u304B\u3093"
+  - text: "gyakuten\n\u304E\u3083\u304F\u3066\u3093"
+  - text: "shoppai\n\u3057\u3087\u3063\u3071\u3044"
+  - text: "junbichu\n\u3058\u3085\u3093\u3073\u3061\u3085\u3046"
+  - text: "chikatetsu\n\u3061\u304B\u3066\u3064"
+  - text: "hyokkori\n\u3072\u3087\u3063\u3053\u308A"
+  - text: "kakurenbo\n\u304B\u304F\u308C\u3093\u307C"
+  - text: "michi tono souguu\n\u307F\u3061\u3068\u306E\u305D\u3046\u3050\u3046"
+  - text: "mujuuryoku\n\u3080\u3058\u3085\u3046\u308A\u3087\u304F"
+  - text: "nazo no shingou\n\u306A\u305E\u306E\u3057\u3093\u3054\u3046"
+  - text: "ginga no kanata\n\u304E\u3093\u304C\u306E\u304B\u306A\u305F"
+  - text: "chikyuujin\n\u3061\u304D\u3085\u3046\u3058\u3093"
+  - text: "nanikairu\n\u306A\u306B\u304B\u3044\u308B"
+  - text: "enban shuurai\n\u3048\u3093\u3070\u3093\u3057\u3085\u3046\u3089\u3044"
+  - text: "pikopiko\n\u30D4\u30B3\u30D4\u30B3"
   correctKeySound: {fileID: 0}
   incorrectKeySound: {fileID: 0}
   clearSound: {fileID: 0}
@@ -1188,7 +1211,7 @@ GameObject:
   - component: {fileID: 130160470}
   - component: {fileID: 130160469}
   m_Layer: 0
-  m_Name: Cube (4)
+  m_Name: wall North
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1599,8 +1622,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 160355903}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.55}
+  m_LocalScale: {x: 1.1077158, y: 1.1911051, z: 1.1911051}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1552669352}
@@ -1608,7 +1631,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.0018, y: 0.0619}
+  m_AnchoredPosition: {x: -0.0071829, y: 0.0619}
   m_SizeDelta: {x: 15.2, y: 7.3101}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &160355905
@@ -2014,6 +2037,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180097298}
   m_CullTransparentMesh: 1
+--- !u!1 &221120719
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 221120721}
+  - component: {fileID: 221120720}
+  m_Layer: 0
+  m_Name: EscaprManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &221120720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221120719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfa6d1a3a1b492b4fac5f7f6e2eeb609, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EscapeManager
+  titleSceneName: TitleScene
+--- !u!4 &221120721
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221120719}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.16513, y: 1, z: 5.06223}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &239136049
 GameObject:
   m_ObjectHideFlags: 0
@@ -6268,7 +6336,7 @@ GameObject:
   - component: {fileID: 890331940}
   - component: {fileID: 890331939}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: wall East
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6597,7 +6665,7 @@ RectTransform:
   m_GameObject: {fileID: 957725718}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 8}
-  m_LocalScale: {x: 0.8991908, y: 0.8991908, z: 0.8991908}
+  m_LocalScale: {x: 1.0080341, y: 0.8244051, z: 0.8991908}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2109190364}
@@ -6605,7 +6673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.25, y: 4.5}
+  m_AnchoredPosition: {x: -0.25524977, y: 3.44}
   m_SizeDelta: {x: 16, y: 8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &976923609
@@ -8842,15 +8910,15 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1552669351}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.09}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.11}
+  m_LocalScale: {x: 1.0526218, y: 1.0526218, z: 1.0526218}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 160355904}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.05, y: 0}
+  m_AnchoredPosition: {x: 0.049999, y: 0.00000019382}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1552669353
@@ -8900,8 +8968,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 2
-  m_fontSizeBase: 2
+  m_fontSize: 1
+  m_fontSizeBase: 1
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -12071,8 +12139,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109190363}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.62448}
+  m_LocalScale: {x: 1.377861, y: 1.2527148, z: 1.2527148}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 160355904}
@@ -12080,7 +12148,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -0.01822, y: -0.01565}
   m_SizeDelta: {x: 16.2, y: 8.0015}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2109190365
@@ -12418,7 +12486,7 @@ GameObject:
   - component: {fileID: 2127990437}
   - component: {fileID: 2127990436}
   m_Layer: 0
-  m_Name: Cube (1)
+  m_Name: wall South
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12735,6 +12803,7 @@ SceneRoots:
   - {fileID: 976923611}
   - {fileID: 56315913}
   - {fileID: 1727556444}
+  - {fileID: 221120721}
   - {fileID: 1357184951}
   - {fileID: 957725722}
   - {fileID: 832575519}
