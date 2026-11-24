@@ -38,14 +38,17 @@ public class PlayerController : MonoBehaviour
 
     private bool isGrounded;
     private bool isHipDropping = false;
+    private bool isDashing = false;
 
     public bool IsHipDropping => isHipDropping;
     public bool IsRecovering => recoveryTimer > 0f;
     public bool IsGrounded => isGrounded;
+    public bool IsDashing => isDashing;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int IsHipDroppingHash = Animator.StringToHash("IsHipDropping");
     private static readonly int IsRecoveringHash = Animator.StringToHash("IsRecovering");
+    private static readonly int IsDashingHash = Animator.StringToHash("IsDashing");
 
     void Awake()
     {
@@ -163,9 +166,13 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
         }
 
-        if (isHipDropping || recoveryTimer > 0f) return;
+        if (isHipDropping || recoveryTimer > 0f)
+        {
+            isDashing = false;
+            return;
+        }
 
-        bool isDashing = false;
+        isDashing = false;
         if (playerInput.devices.Count > 0 && playerInput.devices[0] is Gamepad pad)
         {
             isDashing = pad.rightShoulder.isPressed;
@@ -200,12 +207,14 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat(SpeedHash, speed);
             animator.SetBool(IsHipDroppingHash, isHipDropping);
             animator.SetBool(IsRecoveringHash, recoveryTimer > 0f);
+            animator.SetBool(IsDashingHash, isDashing && speed > 0.1f && isGrounded);
         }
     }
 
     void StartHipDrop()
     {
         isHipDropping = true;
+        isDashing = false;
         recoveryTimer = 0f;
 
         Vector3 vel = rb.linearVelocity;
