@@ -2940,6 +2940,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3065,6 +3066,18 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e1b9218685842d48bdf6092ccb585fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShaker
 --- !u!1 &331755396
 GameObject:
   m_ObjectHideFlags: 0
@@ -4651,7 +4664,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
@@ -4671,12 +4684,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: -0.12, y: 0.12, z: 0.2}
-  m_Center: {x: -0, y: 0.04, z: 0}
+  m_Size: {x: -0.134, y: 0.108, z: 0.23}
+  m_Center: {x: 0.017, y: 0.045, z: -0.009}
 --- !u!114 &616362538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4689,9 +4702,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a7e533517f21a14d80eee25b4d7a895, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DaipanGimmick
+  autoRepeatDaipan: 1
+  minDaipanInterval: 7
+  maxDaipanInterval: 15
+  startDelay: 2
+  handAnimator: {fileID: 616362534}
+  daipanTriggerName: Daipan
+  handBoxCollider: {fileID: 616362537}
+  colliderDropDelay: 2.5
+  colliderDropOffset: {x: 0, y: -0.01, z: 0}
+  colliderDropDuration: 1
+  slamOffset: {x: 0, y: -0.08, z: 0}
+  slamHoldDuration: 0
   cameraTransform: {fileID: 330585546}
-  shakeDuration: 0.25
-  shakeMagnitude: 0.15
+  shakeDuration: 1
+  shakeMagnitude: 0.4
+  damping: 1
+  impactDelay: 0
+  triggerOnDeskContact: 1
+  deskTag: Desk
+  impactCooldown: 0.2
   stunDuration: 1.5
 --- !u!1 &660541264
 GameObject:
@@ -4998,15 +5028,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fbfba8a1b4741dc438a20b73b1557e83, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.03
+      value: -9.34
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fbfba8a1b4741dc438a20b73b1557e83, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.7
+      value: 1.37
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fbfba8a1b4741dc438a20b73b1557e83, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.67
+      value: -4.04
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fbfba8a1b4741dc438a20b73b1557e83, type: 3}
       propertyPath: m_LocalRotation.w
@@ -9569,8 +9599,8 @@ GameObject:
   - component: {fileID: 1526849552}
   - component: {fileID: 1526849551}
   m_Layer: 0
-  m_Name: Cube
-  m_TagString: Untagged
+  m_Name: Desk
+  m_TagString: Desk
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
