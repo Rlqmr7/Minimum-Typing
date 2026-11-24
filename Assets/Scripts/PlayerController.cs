@@ -1,15 +1,16 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
-[RequireComponent(typeof(PlayerInput))] // ★ PlayerInputを必須にする
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
     private Vector2 moveInput;
     private Rigidbody rb;
     private CapsuleCollider col;
-    private PlayerInput playerInput; // ★ どのプレイヤー（プレイヤー1、プレイヤー2）か識別するコンポーネント
+    private PlayerInput playerInput;
 
     [Header("移動設定")]
     public float moveForce = 35f;
@@ -22,14 +23,20 @@ public class PlayerController : MonoBehaviour
     public float hipDropRecoveryTime = 1.0f;
     private float recoveryTimer = 0f;
 
+    [Header("行動不能（スタン）設定")]
+    private bool isStunned = false;
+    private Coroutine stunCoroutine;
+
     [Header("滞空時間調整（落下・重力強化）")]
     public float gravityMultiplier = 2.5f;
 
     private bool isGrounded;
     private bool isHipDropping = false;
 
+    public bool IsGrounded => isGrounded;
     public bool IsHipDropping => isHipDropping;
     public bool IsRecovering => recoveryTimer > 0f;
+    public bool IsStunned => isStunned;
 
     [Header("エフェクト設定")]
     public ParticleSystem dustEffect;
@@ -47,13 +54,15 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // PlayerInput コンポーネントから自動で呼ばれる
     public void OnMove(InputValue value)
     {
-        Vector2 rawInput = value.Get<Vector2>();
+        if (isStunned)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
 
-        // ★ ここでコンソールに入力が届いているか確認する
-       // Debug.Log("入力値: " + rawInput);
+        Vector2 rawInput = value.Get<Vector2>();
 
         if (rawInput.magnitude < 0.05f)
         {
@@ -65,9 +74,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // PlayerInput からボタンが押されたときに呼ばれるアクション（後述の設定用）
     public void OnJumpOrHipDrop(InputValue value)
     {
+        if (isStunned) return;
+
         if (value.isPressed && recoveryTimer <= 0f)
         {
             if (isGrounded)
@@ -119,11 +129,8 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
         }
 
-        if (isHipDropping || recoveryTimer > 0f) return;
+        if (isStunned || isHipDropping || recoveryTimer > 0f) return;
 
-        // Gamepad.current ではなく、このプレイヤーに割り当てられたデバイスからダッシュ入力を取ることもできますが、
-        // 簡易的に各プレイヤーの右肩ボタン（または特定の判定）にしたい場合は Input System の Actions を使います。
-        // ここでは便宜上、既存のロジックを維持しつつ調整します。
         bool isDashing = false;
         if (playerInput.devices.Count > 0 && playerInput.devices[0] is Gamepad pad)
         {
@@ -141,6 +148,32 @@ public class PlayerController : MonoBehaviour
         velocityChange.y = 0;
 
         rb.AddForce(velocityChange, ForceMode.VelocityChange);
+    }
+
+    // 外部（DaipanGimmickなど）から行動不能を開始する
+    public void StartStun(float duration)
+    {
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(stunCoroutine);
+        }
+        stunCoroutine = StartCoroutine(StunRoutine(duration));
+    }
+
+    private IEnumerator StunRoutine(float duration)
+    {
+        isStunned = true;
+        isHipDropping = false;
+        moveInput = Vector2.zero;
+
+        // 横方向の慣性を止めてその場で行動不能にする（落下Y速度は維持）
+        rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        Debug.Log($"{gameObject.name}：台パンヒット！{duration}秒間行動不能");
+
+        yield return new WaitForSeconds(duration);
+
+        isStunned = false;
+        stunCoroutine = null;
     }
 
     void StartHipDrop()
