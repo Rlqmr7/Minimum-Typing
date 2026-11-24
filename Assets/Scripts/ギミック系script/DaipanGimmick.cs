@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class DaipanGimmick : MonoBehaviour
 {
@@ -16,6 +17,30 @@ public class DaipanGimmick : MonoBehaviour
     public Animator handAnimator;
     [Tooltip("Animatorに設定したTrigger名（空なら直接OnDaipanImpactを呼ぶ）")]
     public string daipanTriggerName = "Daipan";
+
+    [Header("警告表示設定（Consoleログ + UnityEvent）")]
+    [Tooltip("左手が現れる何秒前に警告を出すか（X秒前）")]
+    public float warningLeadTime = 1.5f;
+    [Tooltip("Consoleに出す警告メッセージ")]
+    public string warningMessage = "台パンがくるよ！";
+    [Tooltip("台パン発動と同時に警告を終了するか")]
+    public bool hideWarningOnImpact = true;
+    [Tooltip("台パン発動で消さない場合、警告を自動で終わらせる秒数")]
+    public float warningDisplayDuration = 1.5f;
+    [Tooltip("警告が出たタイミングで呼ばれるイベント")]
+    public UnityEvent onWarningTriggered;
+    [Tooltip("警告が消えたタイミングで呼ばれるイベント")]
+    public UnityEvent onWarningEnded;
+
+    [Header("左手の出現・消滅設定")]
+    [Tooltip("出現・消滅させる左手のオブジェクト（空ならこのGameObject自体を使う）")]
+    public GameObject handVisualTarget;
+    [Tooltip("台パンの何秒前に左手を出現させるか")]
+    public float handAppearLeadTime = 1.0f;
+    [Tooltip("台パン発動（ExecuteImpact）から何秒後に左手を消すか")]
+    public float handHideDelay = 1.0f;
+    [Tooltip("開始時に左手を非表示にしておくか")]
+    public bool hideHandOnStart = true;
 
     [Header("BoxCollider 遅延移動設定")]
     [Tooltip("動かす左手のBoxCollider（空ならこのオブジェクトから自動取得）")]
@@ -60,12 +85,15 @@ public class DaipanGimmick : MonoBehaviour
     private Coroutine repeatCoroutine;
     private Coroutine slamPosCoroutine;
     private Coroutine colliderMoveCoroutine;
+    private Coroutine handHideCoroutine;
+    private Coroutine warningHideCoroutine;
 
     private Vector3 baseCameraLocalPos;
     private Vector3 baseHandLocalPos;
     private Vector3 baseColliderCenter;
     private bool isColliderCenterInitialized = false;
     private bool isHandSlamOffsetActive = false;
+    private bool isWarningActive = false;
     private float lastImpactTime = -999f;
 
     private void Awake()
@@ -92,6 +120,13 @@ public class DaipanGimmick : MonoBehaviour
             baseColliderCenter = handBoxCollider.center;
             isColliderCenterInitialized = true;
         }
+
+        if (hideHandOnStart)
+        {
+            SetHandVisible(false);
+        }
+
+        EndWarningImmediate();
     }
 
     private void OnEnable()
@@ -107,6 +142,13 @@ public class DaipanGimmick : MonoBehaviour
         StopAutoDaipanLoop();
         RestoreHandPositionImmediately();
         RestoreColliderCenterImmediately();
+        EndWarningImmediate();
+
+        if (handHideCoroutine != null)
+        {
+            StopCoroutine(handHideCoroutine);
+            handHideCoroutine = null;
+        }
     }
 
     public void StartAutoDaipanLoop()
@@ -126,26 +168,140 @@ public class DaipanGimmick : MonoBehaviour
 
     private IEnumerator AutoDaipanCoroutine()
     {
-        if (startDelay > 0f)
-        {
-            yield return new WaitForSeconds(startDelay);
-        }
+        float handLead = Mathf.Max(0f, handAppearLeadTime);
+        float totalLeadBeforeImpact = handLead + Mathf.Max(0f, warningLeadTime);
+
+        yield return StartCoroutine(WaitWithWarningAndHandAppear(startDelay, handLead, totalLeadBeforeImpact));
 
         while (true)
         {
             TriggerDaipanAnimation();
 
-            float minWait = Mathf.Max(0.1f, Mathf.Min(minDaipanInterval, maxDaipanInterval));
+            float minWait = Mathf.Max(0.2f, Mathf.Min(minDaipanInterval, maxDaipanInterval));
             float maxWait = Mathf.Max(minWait, Mathf.Max(minDaipanInterval, maxDaipanInterval));
             float waitTime = Random.Range(minWait, maxWait);
 
             Debug.Log($"次の台パンまで {waitTime:F2} 秒待機");
-            yield return new WaitForSeconds(waitTime);
+
+            yield return StartCoroutine(WaitWithWarningAndHandAppear(waitTime, handLead, totalLeadBeforeImpact));
         }
+    }
+
+    private IEnumerator WaitWithWarningAndHandAppear(float interval, float handLead, float totalLeadBeforeImpact)
+    {
+        float clampedTotalLead = Mathf.Min(totalLeadBeforeImpact, Mathf.Max(0f, interval - 0.05f));
+        float clampedHandLead = Mathf.Min(handLead, clampedTotalLead);
+        float warningLead = Mathf.Max(0f, clampedTotalLead - clampedHandLead);
+
+        float beforeWarningWait = Mathf.Max(0f, interval - clampedTotalLead);
+        if (beforeWarningWait > 0f)
+        {
+            yield return new WaitForSeconds(beforeWarningWait);
+        }
+
+        if (warningLead > 0f)
+        {
+            TriggerWarning();
+            yield return new WaitForSeconds(warningLead);
+        }
+
+        SetHandVisible(true);
+
+        if (clampedHandLead > 0f)
+        {
+            yield return new WaitForSeconds(clampedHandLead);
+        }
+    }
+
+    private void TriggerWarning()
+    {
+        if (warningHideCoroutine != null)
+        {
+            StopCoroutine(warningHideCoroutine);
+            warningHideCoroutine = null;
+        }
+
+        isWarningActive = true;
+
+        if (!string.IsNullOrEmpty(warningMessage))
+        {
+            Debug.Log(warningMessage);
+        }
+
+        onWarningTriggered?.Invoke();
+
+        if (!hideWarningOnImpact && warningDisplayDuration > 0f)
+        {
+            warningHideCoroutine = StartCoroutine(EndWarningAfterDelayCoroutine(warningDisplayDuration));
+        }
+    }
+
+    private IEnumerator EndWarningAfterDelayCoroutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        EndWarningImmediate();
+    }
+
+    public void EndWarningImmediate()
+    {
+        if (warningHideCoroutine != null)
+        {
+            StopCoroutine(warningHideCoroutine);
+            warningHideCoroutine = null;
+        }
+
+        if (isWarningActive)
+        {
+            isWarningActive = false;
+            onWarningEnded?.Invoke();
+        }
+    }
+
+    private void SetHandVisible(bool visible)
+    {
+        GameObject target = handVisualTarget != null ? handVisualTarget : gameObject;
+
+        if (target == gameObject)
+        {
+            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer r in renderers)
+            {
+                r.enabled = visible;
+            }
+            return;
+        }
+
+        target.SetActive(visible);
+    }
+
+    private void ScheduleHideHand()
+    {
+        if (handHideCoroutine != null)
+        {
+            StopCoroutine(handHideCoroutine);
+            handHideCoroutine = null;
+        }
+
+        if (handHideDelay <= 0f)
+        {
+            SetHandVisible(false);
+            return;
+        }
+
+        handHideCoroutine = StartCoroutine(HideHandAfterDelayCoroutine());
+    }
+
+    private IEnumerator HideHandAfterDelayCoroutine()
+    {
+        yield return new WaitForSeconds(handHideDelay);
+        SetHandVisible(false);
+        handHideCoroutine = null;
     }
 
     public void TriggerDaipanAnimation()
     {
+        SetHandVisible(true);
+
         if (handAnimator != null && !string.IsNullOrEmpty(daipanTriggerName))
         {
             handAnimator.SetTrigger(daipanTriggerName);
@@ -155,7 +311,6 @@ public class DaipanGimmick : MonoBehaviour
             OnDaipanImpact();
         }
 
-        // アニメーション開始から X 秒後に BoxCollider を下げる
         StartDelayedColliderDrop();
     }
 
@@ -246,6 +401,11 @@ public class DaipanGimmick : MonoBehaviour
     {
         Debug.Log($"台パン衝撃発動！（遅延: {impactDelay}秒）");
 
+        if (hideWarningOnImpact)
+        {
+            EndWarningImmediate();
+        }
+
         StartSlamOffset();
 
         if (cameraTransform != null)
@@ -269,8 +429,10 @@ public class DaipanGimmick : MonoBehaviour
                 continue;
             }
 
-            // player.StartStun(stunDuration);
+            player.StartStun(stunDuration);
         }
+
+        ScheduleHideHand();
     }
 
     private void StartSlamOffset()

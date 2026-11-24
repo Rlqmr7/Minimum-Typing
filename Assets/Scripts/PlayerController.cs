@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -24,6 +25,11 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer = ~0;
     private float recoveryTimer = 0f;
     private float jumpLockTimer = 0f;
+
+    [Header("スタン設定")]
+    private bool isStunned = false;
+    private Coroutine stunCoroutine;
+    public bool IsStunned => isStunned;
 
     [Header("滞空時間調整（落下・重力強化）")]
     public float gravityMultiplier = 2.5f;
@@ -76,6 +82,12 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（Move アクション用）
     public void OnMove(InputValue value)
     {
+        if (isStunned)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         Vector2 rawInput = value.Get<Vector2>();
         moveInput = rawInput.magnitude < 0.05f ? Vector2.zero : rawInput;
     }
@@ -83,7 +95,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（Jump アクション用）
     public void OnJump(InputValue value)
     {
-        if (!value.isPressed || recoveryTimer > 0f) return;
+        if (isStunned || !value.isPressed || recoveryTimer > 0f) return;
 
         // 接地中かつヒップドロップ中でないときだけジャンプ
         if (isGrounded && !isHipDropping && jumpLockTimer <= 0f)
@@ -102,7 +114,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（HipDrop / ZR アクション用）
     public void OnHipDrop(InputValue value)
     {
-        if (!value.isPressed || recoveryTimer > 0f) return;
+        if (isStunned || !value.isPressed || recoveryTimer > 0f) return;
 
         // 空中かつヒップドロップ中でないときだけヒップドロップ開始
         if (!isGrounded && !isHipDropping)
@@ -166,6 +178,16 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
         }
 
+        if (isStunned)
+        {
+            isDashing = false;
+            Vector3 stunVel = rb.linearVelocity;
+            stunVel.x = 0f;
+            stunVel.z = 0f;
+            rb.linearVelocity = stunVel;
+            return;
+        }
+
         if (isHipDropping || recoveryTimer > 0f)
         {
             isDashing = false;
@@ -194,9 +216,9 @@ public class PlayerController : MonoBehaviour
     private void UpdateModelRotationAndAnimation()
     {
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        float speed = horizontalVel.magnitude;
+        float speed = isStunned ? 0f : horizontalVel.magnitude;
 
-        if (speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
+        if (!isStunned && speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
         {
             Quaternion targetRot = Quaternion.LookRotation(horizontalVel.normalized, Vector3.up);
             modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRot, turnSpeed * Time.deltaTime);
@@ -207,8 +229,39 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat(SpeedHash, speed);
             animator.SetBool(IsHipDroppingHash, isHipDropping);
             animator.SetBool(IsRecoveringHash, recoveryTimer > 0f);
-            animator.SetBool(IsDashingHash, isDashing && speed > 0.1f && isGrounded);
+            animator.SetBool(IsDashingHash, !isStunned && isDashing && speed > 0.1f && isGrounded);
         }
+    }
+
+    // DaipanGimmick から呼ばれるスタン開始メソッド
+    public void StartStun(float duration)
+    {
+        if (stunCoroutine != null)
+        {
+            StopCoroutine(stunCoroutine);
+        }
+
+        stunCoroutine = StartCoroutine(StunCoroutine(duration));
+    }
+
+    private IEnumerator StunCoroutine(float duration)
+    {
+        isStunned = true;
+        isDashing = false;
+        moveInput = Vector2.zero;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
+
+        Debug.Log($"{gameObject.name}：スタン開始（{duration}秒間行動不能）");
+
+        yield return new WaitForSeconds(duration);
+
+        isStunned = false;
+        stunCoroutine = null;
+        Debug.Log($"{gameObject.name}：スタン解除！");
     }
 
     void StartHipDrop()
