@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,11 +25,6 @@ public class PlayerController : MonoBehaviour
     private float recoveryTimer = 0f;
     private float jumpLockTimer = 0f;
 
-    [Header("スタン設定")]
-    private bool isStunned = false;
-    private Coroutine stunCoroutine;
-    public bool IsStunned => isStunned;
-
     [Header("滞空時間調整（落下・重力強化）")]
     public float gravityMultiplier = 2.5f;
 
@@ -45,6 +39,7 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isHipDropping = false;
     private bool isDashing = false;
+    private Vector3 externalWindVelocity = Vector3.zero;
 
     public bool IsHipDropping => isHipDropping;
     public bool IsRecovering => recoveryTimer > 0f;
@@ -82,12 +77,6 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（Move アクション用）
     public void OnMove(InputValue value)
     {
-        if (isStunned)
-        {
-            moveInput = Vector2.zero;
-            return;
-        }
-
         Vector2 rawInput = value.Get<Vector2>();
         moveInput = rawInput.magnitude < 0.05f ? Vector2.zero : rawInput;
     }
@@ -95,7 +84,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（Jump アクション用）
     public void OnJump(InputValue value)
     {
-        if (isStunned || !value.isPressed || recoveryTimer > 0f) return;
+        if (!value.isPressed || recoveryTimer > 0f) return;
 
         // 接地中かつヒップドロップ中でないときだけジャンプ
         if (isGrounded && !isHipDropping && jumpLockTimer <= 0f)
@@ -114,7 +103,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（HipDrop / ZR アクション用）
     public void OnHipDrop(InputValue value)
     {
-        if (isStunned || !value.isPressed || recoveryTimer > 0f) return;
+        if (!value.isPressed || recoveryTimer > 0f) return;
 
         // 空中かつヒップドロップ中でないときだけヒップドロップ開始
         if (!isGrounded && !isHipDropping)
@@ -126,6 +115,12 @@ public class PlayerController : MonoBehaviour
     public void OnDash(InputValue value)
     {
         // ダッシュボタン単体押下時の拡張用
+    }
+
+    // FanZone など外部ギミックから風速度を加算する
+    public void AddExternalWind(Vector3 windVelocity)
+    {
+        externalWindVelocity += windVelocity;
     }
 
     void Update()
@@ -178,19 +173,10 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
         }
 
-        if (isStunned)
-        {
-            isDashing = false;
-            Vector3 stunVel = rb.linearVelocity;
-            stunVel.x = 0f;
-            stunVel.z = 0f;
-            rb.linearVelocity = stunVel;
-            return;
-        }
-
         if (isHipDropping || recoveryTimer > 0f)
         {
             isDashing = false;
+            externalWindVelocity = Vector3.zero;
             return;
         }
 
@@ -206,19 +192,30 @@ public class PlayerController : MonoBehaviour
 
         float currentMaxSpeed = isDashing ? maxSpeed * dashSpeedMultiplier : maxSpeed;
 
-        Vector3 targetVelocity = new Vector3(moveInput.x * currentMaxSpeed, rb.linearVelocity.y, moveInput.y * currentMaxSpeed);
+        // プレイヤーの移動入力と扇風機の風速度を合成
+        Vector3 inputVelocity = new Vector3(moveInput.x * currentMaxSpeed, 0f, moveInput.y * currentMaxSpeed);
+        Vector3 targetVelocity = inputVelocity + new Vector3(externalWindVelocity.x, 0f, externalWindVelocity.z);
+
         Vector3 velocityChange = targetVelocity - rb.linearVelocity;
         velocityChange.y = 0f;
 
         rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+        // 上方向の風（上昇気流）がある場合の加算
+        if (externalWindVelocity.y > 0.01f)
+        {
+            rb.AddForce(Vector3.up * externalWindVelocity.y, ForceMode.Acceleration);
+        }
+
+        externalWindVelocity = Vector3.zero;
     }
 
     private void UpdateModelRotationAndAnimation()
     {
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-        float speed = isStunned ? 0f : horizontalVel.magnitude;
+        float speed = horizontalVel.magnitude;
 
-        if (!isStunned && speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
+        if (speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
         {
             Quaternion targetRot = Quaternion.LookRotation(horizontalVel.normalized, Vector3.up);
             modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRot, turnSpeed * Time.deltaTime);
@@ -229,39 +226,8 @@ public class PlayerController : MonoBehaviour
             animator.SetFloat(SpeedHash, speed);
             animator.SetBool(IsHipDroppingHash, isHipDropping);
             animator.SetBool(IsRecoveringHash, recoveryTimer > 0f);
-            animator.SetBool(IsDashingHash, !isStunned && isDashing && speed > 0.1f && isGrounded);
+            animator.SetBool(IsDashingHash, isDashing && speed > 0.1f && isGrounded);
         }
-    }
-
-    // DaipanGimmick から呼ばれるスタン開始メソッド
-    public void StartStun(float duration)
-    {
-        if (stunCoroutine != null)
-        {
-            StopCoroutine(stunCoroutine);
-        }
-
-        stunCoroutine = StartCoroutine(StunCoroutine(duration));
-    }
-
-    private IEnumerator StunCoroutine(float duration)
-    {
-        isStunned = true;
-        isDashing = false;
-        moveInput = Vector2.zero;
-
-        if (rb != null)
-        {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-        }
-
-        Debug.Log($"{gameObject.name}：スタン開始（{duration}秒間行動不能）");
-
-        yield return new WaitForSeconds(duration);
-
-        isStunned = false;
-        stunCoroutine = null;
-        Debug.Log($"{gameObject.name}：スタン解除！");
     }
 
     void StartHipDrop()

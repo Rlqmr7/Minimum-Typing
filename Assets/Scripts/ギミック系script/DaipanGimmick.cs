@@ -429,7 +429,7 @@ public class DaipanGimmick : MonoBehaviour
                 continue;
             }
 
-            player.StartStun(stunDuration);
+            //player.StartStun(stunDuration);
         }
 
         ScheduleHideHand();
