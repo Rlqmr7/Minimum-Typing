@@ -21,6 +21,10 @@ public class FanZone : MonoBehaviour
     [Tooltip("横軸: 距離割合(0=至近距離, 1=最大距離) / 縦軸: 風力の強さ割合")]
     public AnimationCurve falloffCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.1f);
 
+    [Header("稼働状態")]
+    [SerializeField] private bool isFanActive = true;
+    public bool IsFanActive => isFanActive;
+
     [Header("ビジュアル（任意）")]
     public ParticleSystem windParticles;
     public Transform fanBlades;
@@ -39,14 +43,32 @@ public class FanZone : MonoBehaviour
 
     private void Update()
     {
-        if (fanBlades != null)
+        if (isFanActive && fanBlades != null)
         {
             fanBlades.Rotate(Vector3.forward, bladeRotateSpeed * Time.deltaTime, Space.Self);
         }
     }
 
+    public void SetFanActive(bool active)
+    {
+        isFanActive = active;
+
+        if (windParticles != null)
+        {
+            if (isFanActive) windParticles.Play();
+            else windParticles.Stop();
+        }
+    }
+
+    public void ToggleFan()
+    {
+        SetFanActive(!isFanActive);
+    }
+
     private void OnTriggerStay(Collider other)
     {
+        if (!isFanActive) return;
+
         PlayerController player = other.GetComponent<PlayerController>();
         if (player == null)
         {
@@ -62,10 +84,11 @@ public class FanZone : MonoBehaviour
 
     public Vector3 CalculateWindVelocity(Vector3 targetPos)
     {
+        if (!isFanActive) return Vector3.zero;
+
         Vector3 dir = useObjectForward ? fanOrigin.forward : customWindDirection.normalized;
         Vector3 toTarget = targetPos - fanOrigin.position;
 
-        // 風の進行方向に沿った距離を測る（横ズレしていても奥行き距離で正確に減衰する）
         float distanceAlongWind = Mathf.Max(0f, Vector3.Dot(toTarget, dir));
 
         if (distanceAlongWind > maxDistance)
@@ -79,7 +102,16 @@ public class FanZone : MonoBehaviour
         return dir * (maxWindSpeed * strengthMultiplier);
     }
 
-    // Sceneビューで風の向きと距離を可視化
+    public Vector3 GetWindVelocityAt(Vector3 worldPos)
+    {
+        return CalculateWindVelocity(worldPos);
+    }
+
+    public float GetWindSpeedAt(Vector3 worldPos)
+    {
+        return CalculateWindVelocity(worldPos).magnitude;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Transform origin = fanOrigin != null ? fanOrigin : transform;
