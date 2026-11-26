@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayer = ~0;
     private float recoveryTimer = 0f;
     private float jumpLockTimer = 0f;
+    private float stunTimer = 0f;
 
     [Header("滞空時間調整（落下・重力強化）")]
     public float gravityMultiplier = 2.5f;
@@ -45,6 +46,7 @@ public class PlayerController : MonoBehaviour
     public bool IsRecovering => recoveryTimer > 0f;
     public bool IsGrounded => isGrounded;
     public bool IsDashing => isDashing;
+    public bool IsStunned => stunTimer > 0f;
 
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int IsHipDroppingHash = Animator.StringToHash("IsHipDropping");
@@ -84,7 +86,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（Jump アクション用）
     public void OnJump(InputValue value)
     {
-        if (!value.isPressed || recoveryTimer > 0f) return;
+        if (!value.isPressed || recoveryTimer > 0f || stunTimer > 0f) return;
 
         // 接地中かつヒップドロップ中でないときだけジャンプ
         if (isGrounded && !isHipDropping && jumpLockTimer <= 0f)
@@ -103,7 +105,7 @@ public class PlayerController : MonoBehaviour
     // PlayerInput コンポーネントから自動で呼ばれる（HipDrop / ZR アクション用）
     public void OnHipDrop(InputValue value)
     {
-        if (!value.isPressed || recoveryTimer > 0f) return;
+        if (!value.isPressed || recoveryTimer > 0f || stunTimer > 0f) return;
 
         // 空中かつヒップドロップ中でないときだけヒップドロップ開始
         if (!isGrounded && !isHipDropping)
@@ -125,6 +127,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (stunTimer > 0f)
+        {
+            stunTimer -= Time.deltaTime;
+        }
+
         if (recoveryTimer > 0f)
         {
             recoveryTimer -= Time.deltaTime;
@@ -173,7 +180,7 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Physics.gravity * (gravityMultiplier - 1f), ForceMode.Acceleration);
         }
 
-        if (isHipDropping || recoveryTimer > 0f)
+        if (isHipDropping || recoveryTimer > 0f || stunTimer > 0f)
         {
             isDashing = false;
             externalWindVelocity = Vector3.zero;
@@ -215,7 +222,7 @@ public class PlayerController : MonoBehaviour
         Vector3 horizontalVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         float speed = horizontalVel.magnitude;
 
-        if (speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && modelTransform != null)
+        if (speed > 0.1f && !isHipDropping && recoveryTimer <= 0f && stunTimer <= 0f && modelTransform != null)
         {
             Quaternion targetRot = Quaternion.LookRotation(horizontalVel.normalized, Vector3.up);
             modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetRot, turnSpeed * Time.deltaTime);
@@ -241,6 +248,21 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = vel;
 
         rb.AddForce(Vector3.down * hipDropForce, ForceMode.Impulse);
+    }
+
+    public void StartStun(float duration)
+    {
+        if (duration <= 0f) return;
+
+        stunTimer = Mathf.Max(stunTimer, duration);
+        isHipDropping = false;
+        isDashing = false;
+        externalWindVelocity = Vector3.zero;
+
+        Vector3 vel = rb.linearVelocity;
+        vel.x = 0f;
+        vel.z = 0f;
+        rb.linearVelocity = vel;
     }
 
     // PhysicalKey.cs から呼ばれる終了処理

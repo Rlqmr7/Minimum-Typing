@@ -10415,7 +10415,7 @@ MonoBehaviour:
   autoRepeatDaipan: 1
   minDaipanInterval: 20
   maxDaipanInterval: 25
-  startDelay: 30
+  startDelay: 2
   handAnimator: {fileID: 616362534}
   daipanTriggerName: Daipan
   warningLeadTime: 1
